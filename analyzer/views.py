@@ -22,7 +22,7 @@ APIID = getattr(settings, "solarEdgeID", None)
 # r = requests.get("https://monitoringapi.solaredge.com/site/" + solarEdgeID + "/overview?api_key=" + solarEdgeAPIKey)
 # r.json()
 
-# print(APIKEY)
+# print('APIKEY: ' + APIKEY)
 s = solaredge.Solaredge(APIKEY)
 
 # details = s.get_details(APIID)
