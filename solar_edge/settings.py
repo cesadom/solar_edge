@@ -25,7 +25,7 @@ SECRET_KEY = '86=fhplx9zikec5%$h*nr1#m14h++2chnvo_&-as*ehu03*63u'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['luftibus.herokuapp.com']
 
 
 # Application definition
