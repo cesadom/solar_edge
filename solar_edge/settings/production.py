@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '86=fhplx9zikec5%$h*nr1#m14h++2chnvo_&-as*ehu03*63u'
+# SECRET_KEY = '86=fhplx9zikec5%$h*nr1#m14h++2chnvo_&-as*ehu03*63u'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -124,3 +124,6 @@ STATIC_URL = '/static/'
 
 solarEdgeID = '672605'
 solarEdgeAPIKey = 'IQ5FXWB3T0BZ3AOGFIJ5138XCFO8S51M'
+
+
+

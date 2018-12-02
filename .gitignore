@@ -1,4 +1,5 @@
 
+.DS_Store
 # */settings.py
 # */*settings.py
 *.sublime-project
@@ -62,6 +63,8 @@ coverage.xml
 # Django stuff:
 *.log
 local_settings.py
+solar_edge/settings/base.py
+solar_edge/settings/local.py
 db.sqlite3
 
 # Flask stuff:
