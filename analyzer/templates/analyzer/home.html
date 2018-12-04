@@ -1,15 +1,14 @@
 {% extends "analyzer/base.html" %}
 {% block content %}
-    {% for post in posts %}
-        <article class="media content-section">
-          <div class="media-body">
-            <div class="article-metadata">
-              <a class="mr-2" href="#">{{ post.author }}</a>
-              <small class="text-muted">{{ post.date_posted }}</small>
-            </div>
-            <h2><a class="article-title" href="#">{{ post.title }}</a></h2>
-            <p class="article-content">{{ post.content }}</p>
-          </div>
-        </article>
-    {% endfor %}
+    <article class="media content-section">
+      <div class="media-body">
+        <div class="article-metadata">
+          <small class="text-muted">last update: 4. Dezember 2018</small>
+        </div>
+        <h2 class="article-title" href="#">SolaEdge Auswertung</h2>
+        <p class="article-content">In Kürze erscheint hier eine Live Ansicht der Solaranlage. Gespiesen von SolarEdge.<p>
+        <p class="article-content"> APIKEY: {{  APIKEY }} </p>
+        <p class="article-content"> APIID: {{  APIID }} </p>
+      </div>
+    </article>
 {% endblock content %}
