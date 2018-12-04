@@ -54,25 +54,25 @@ MIDDLEWARE = [
 ]
 
 
-# Simplified static file serving. 
+# Simplified static file serving.
 # https://warehouse.python.org/project/whitenoise/
 
-ROOT_URLCONF = 'solar_edge.urls' STATIC_URL = '/static/' TEMPLATES = [ { 
-STATICFILES_DIRS = ( 'BACKEND': 
-'django.template.backends.django.DjangoTemplates',
-    os.path.join(BASE_DIR, "static"), 'DIRS': [], 'APP_DIRS': True, 'OPTIONS': 
-        {
-) 'context_processors': [ 'django.template.context_processors.debug', 
-                'django.template.context_processors.request', 
-                'django.contrib.auth.context_processors.auth', 
-                'django.contrib.messages.context_processors.messages',
-            ], STATIC_ROOT = os.path.join(BASE_DIR, "live-static-files", 
-"static-root")
-},
-STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage' }, ]
+STATIC_URL = '/static/'
 
-WSGI_APPLICATION = 'solar_edge.wsgi.application'
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, "static"),
+)
+
+STATIC_ROOT = os.path.join(BASE_DIR, "live-static", "static-root")
+
+STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+
 #STATIC_ROOT = "/home/cfedeploy/webapps/cfehome_static_root/"
+
+MEDIA_URL = "/media/"
+
+MEDIA_ROOT = os.path.join(BASE_DIR, "live-static-files", "media-root")
+
 
 # Database https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 MEDIA_URL = "/media/" DATABASES = { 'default': {
