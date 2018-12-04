@@ -17,9 +17,6 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
@@ -53,31 +50,31 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+ROOT_URLCONF = 'solar_edge.urls'
 
-# Simplified static file serving.
-# https://warehouse.python.org/project/whitenoise/
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
 
-STATIC_URL = '/static/'
-
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, "static"),
-)
-
-STATIC_ROOT = os.path.join(BASE_DIR, "live-static", "static-root")
-
-STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
-
-#STATIC_ROOT = "/home/cfedeploy/webapps/cfehome_static_root/"
-
-MEDIA_URL = "/media/"
-
-MEDIA_ROOT = os.path.join(BASE_DIR, "live-static-files", "media-root")
+WSGI_APPLICATION = 'solar_edge.wsgi.application'
 
 
 # Database https://docs.djangoproject.com/en/2.1/ref/settings/#databases
-MEDIA_URL = "/media/" DATABASES = { 'default': {
-MEDIA_ROOT = os.path.join(BASE_DIR, "live-static-files", "media-root")       
-'ENGINE': 'django.db.backends.sqlite3',
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
@@ -121,6 +118,11 @@ USE_L10N = True
 USE_TZ = True
 
 
+# private settings
+
+solarEdgeID = os.environ.get('solarEdgeID')
+solarEdgeAPIKey = os.environ.get('solarEdgeAPIKey')
+
 # SSL/TLS Settings
 
 CORS_REPLACE_HTTPS_REFERER      = True
@@ -129,10 +131,32 @@ SECURE_PROXY_SSL_HEADER         = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT             = True
 SESSION_COOKIE_SECURE           = True
 CSRF_COOKIE_SECURE              = True
-SECURE_HSTS_INCLUDE_SUBDOMAINS  = True
 SECURE_HSTS_SECONDS             = 1000000
+SECURE_HSTS_INCLUDE_SUBDOMAINS  = True
 SECURE_FRAME_DENY               = True
 
 
+# Simplified static file serving.
+# https://warehouse.python.org/project/whitenoise/
+
+STATIC_URL = '/static/'
+
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, "static"),
+    # os.path.join(os.path.dirname(BASE_DIR), "analyzer", "static"),
+)
+
+STATIC_ROOT = os.path.join(BASE_DIR, "live-static", "static-root")
+
+STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+
+#STATIC_ROOT = "/home/cfedeploy/webapps/cfehome_static_root/"
+
+MEDIA_URL = "/media/"
+
+MEDIA_ROOT = os.path.join(BASE_DIR, "live-static", "media-root")
+
+
+
 # Activate Django-Heroku.
-django_heroku.settings(locals())
+# django_heroku.settings(locals())
