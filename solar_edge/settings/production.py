@@ -17,24 +17,6 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.1/howto/static-files/
-
-# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATIC_URL = '/static/'
-
-# # Extra places for collectstatic to find static files.
-# STATICFILES_DIRS = (
-#     os.path.join(BASE_DIR, 'static'),
-# )
-
-# MIDDLEWARE_CLASSES = (
-#     # Simplified static file serving.
-#     # https://warehouse.python.org/project/whitenoise/
-#     'whitenoise.middleware.WhiteNoiseMiddleware',
-# )
-# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
@@ -62,6 +44,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -70,33 +53,31 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'solar_edge.urls'
 
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
+# Simplified static file serving. 
+# https://warehouse.python.org/project/whitenoise/
+
+ROOT_URLCONF = 'solar_edge.urls' STATIC_URL = '/static/' TEMPLATES = [ { 
+STATICFILES_DIRS = ( 'BACKEND': 
+'django.template.backends.django.DjangoTemplates',
+    os.path.join(BASE_DIR, "static"), 'DIRS': [], 'APP_DIRS': True, 'OPTIONS': 
+        {
+) 'context_processors': [ 'django.template.context_processors.debug', 
+                'django.template.context_processors.request', 
+                'django.contrib.auth.context_processors.auth', 
                 'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
+            ], STATIC_ROOT = os.path.join(BASE_DIR, "live-static-files", 
+"static-root")
+},
+STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage' }, ]
 
 WSGI_APPLICATION = 'solar_edge.wsgi.application'
+#STATIC_ROOT = "/home/cfedeploy/webapps/cfehome_static_root/"
 
-
-# Database
-# https://docs.djangoproject.com/en/2.1/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
+# Database https://docs.djangoproject.com/en/2.1/ref/settings/#databases
+MEDIA_URL = "/media/" DATABASES = { 'default': {
+MEDIA_ROOT = os.path.join(BASE_DIR, "live-static-files", "media-root")       
+'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
