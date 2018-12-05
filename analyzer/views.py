@@ -13,10 +13,10 @@ APIID = getattr(settings, "solarEdgeID", None)
 
 
 def home(request):
-    solarEdgeID = 
-    solarEdgeAPIKey = 
+    solarEdgeID = None
+    solarEdgeAPIKey = None
     api_address='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/overview?api_key=' + solarEdgeAPIKey
-    url = api_address + city
+    url = api_address
     json_data = requests.get(url).json()
     format_add = json_data['base']
     print(format_add)
