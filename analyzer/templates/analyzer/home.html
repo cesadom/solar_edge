@@ -5,18 +5,24 @@
       <div class="article-metadata">
         <small class="text-muted">last update: 4. Dezember 2018</small>
       </div>
-      <h2 class="article-title" href="#">SolaEdge Auswertung</h2>
-      <p class="article-content">In Kürze erscheint hier die Live-Daten der Solaranlage. Gespiesen von SolarEdge.<p>
-      <form method="get">
+      <div class="row">
+        <div class="col-md-10"><h2 class="article-title" href="#">SolaEdge Auswertung</h2></div>
+        <div class="col-md-2"><a href="https://www.solaredge.com/" target="_blank"><img width="100px" src="https://www.solaredge.com/sites/default/files/SolarEdge_logo_header_new.png"></a></div>
+      </div>
+
+      {% if form_submitted %}
+        <p class="article-content">Live-Daten einer SolarEdge Solaranlage basierend auf die eingegebenen API Key und Site ID.</p>
+      {% else %}
+        <p class="article-content">Live-Daten einer SolarEdge Solaranlage basierend auf die Default API Key und Site ID.</p>      
+      {% endif %}
+
+      <form method="get" style="margin-bottom: 10px">
         <input type="text" name="APIKEY_input" placeholder="API Key">
         <input type="text" name="APIID_input" placeholder="Site ID">
         <button type="submit">submit</button>
       </form>
-      {% if form_submitted %}
-        <p><strong>Die unten aufgeführten Daten entsprechen ihrer angefragten API Key {{  APIKEY }} und Site ID {{  APIID }}.</strong></p>
-      {% else %}
-        <p><strong>Die unten aufgeführten Daten entsprechen den Default API Key und Site ID welche im System hinterlegt sind.</strong></p>        
-      {% endif %}
+
+      <p class="article-content">Für die Nutzung der SolarEdge API gelten die entsprechenden <a href="https://monitoring.solaredge.com/solaredge-web/p/license">AGBs</a>.</p>
 
       {% for API_result_key, API_result_value in API_results.items %}
         <p class="article-content"><strong> {{  API_result_key }} </strong></p>
