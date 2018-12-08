@@ -120,8 +120,8 @@ USE_TZ = True
 
 # private settings
 
-solarEdgeID = os.environ.get('solarEdgeID')
-solarEdgeAPIKey = os.environ.get('solarEdgeAPIKey')
+SEDGE_APIKEY = os.environ.get('solarEdgeID')
+SEDGE_SITEID = os.environ.get('solarEdgeAPIKey')
 
 # SSL/TLS Settings
 

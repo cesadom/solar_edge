@@ -6,8 +6,8 @@ import solaredge
 import requests
 
 
-APIKEY = getattr(settings, "solarEdgeAPIKey", None)
-APIID = getattr(settings, "solarEdgeID", None)
+APIKEY = getattr(settings, 'SEDGE_APIKEY', None)
+APIID = getattr(settings, 'SEDGE_SITEID', None)
 # APIKEY = settings.solarEdgeAPIKey
 # APIID = settings.solarEdgeID
 
