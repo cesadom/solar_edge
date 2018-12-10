@@ -3,7 +3,7 @@
 try:
 	from .production import *
 except:
-	from .production_noSSL import *
+	pass
 
 try:
    from .local import *

@@ -122,10 +122,3 @@ def home(request):
     }
     return render(request, 'analyzer/home.html', context)
 
-
-def about(request):
-    return render(request, 'analyzer/about.html', {'title': 'About'})
-
-def cron(request):
-    print('start cron')
-    return HttpResponse('all done!')

@@ -31,6 +31,9 @@ ALLOWED_HOSTS = ['luftibus.herokuapp.com']
 
 INSTALLED_APPS = [
     'analyzer.apps.AnalyzerConfig',
+    'users.apps.UsersConfig',
+    'simulator.apps.SimulatorConfig',
+    'crispy_forms',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -136,6 +139,15 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS  = True
 SECURE_FRAME_DENY               = True
 
 
+# GMail configuration 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASS')
+
+
 # Simplified static file serving.
 # https://warehouse.python.org/project/whitenoise/
 
@@ -143,22 +155,4 @@ STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-# STATICFILES_DIRS = (
-#     os.path.join(BASE_DIR, "static"),
-#     # os.path.join(os.path.dirname(BASE_DIR), "analyzer", "static"),
-# )
-
-# STATIC_ROOT = os.path.join(BASE_DIR, "live-static", "static-root")
-
-# STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
-
-# #STATIC_ROOT = "/home/cfedeploy/webapps/cfehome_static_root/"
-
-# MEDIA_URL = "/media/"
-
-# MEDIA_ROOT = os.path.join(BASE_DIR, "live-static", "media-root")
-
-
-
-# Activate Django-Heroku.
-# django_heroku.settings(locals())
+CRISPY_TEMPLATE_PACK = 'bootstrap4'

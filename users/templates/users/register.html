@@ -1,0 +1,21 @@
+{% extends "analyzer/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="content-section">
+        <form method="POST">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Registriere einen neuen User</legend>
+                {{ form|crispy }}
+            </fieldset>
+            <div class="form-group">
+                <button class="btn btn-outline-info" type="submit">Registrieren</button>
+            </div>
+        </form>
+        <div class="border-top pt-3">
+            <small class="text-muted">
+                Hast du bereits einen User? <a class="ml-2" href="#">Login</a>
+            </small>
+        </div>
+    </div>
+{% endblock content %}

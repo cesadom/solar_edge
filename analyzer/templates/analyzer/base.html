@@ -30,11 +30,17 @@
             <div class="navbar-nav mr-auto">
               <a class="nav-item nav-link" href="{% url 'analyzer-home' %}">Home</a>
               <a class="nav-item nav-link" href="{% url 'analyzer-about' %}">About</a>
+              <a class="nav-item nav-link" href="{% url 'analyzer-cron' %}">Start CronJob</a>
             </div>
             <!-- Navbar Right Side -->
             <div class="navbar-nav">
-              <a class="nav-item nav-link" href="#">Login</a>
-              <a class="nav-item nav-link" href="#">Register</a>
+              {% if user.is_authenticated %}
+                <a class="nav-item nav-link" href="{% url 'profile' %}">Mein Konto</a>
+                <a class="nav-item nav-link" href="{% url 'logout' %}">Logout</a>
+              {% else %}
+                <a class="nav-item nav-link" href="{% url 'login' %}">Login</a>
+                <a class="nav-item nav-link" href="{% url 'register' %}">Register</a>
+              {% endif %}
             </div>
           </div>
         </div>
@@ -51,9 +57,9 @@
             <p class='text-muted'>Quick Links
               <ul class="list-group">
                 <li class="list-group-item list-group-item-light"><a target="_blank" href="https://trello.com/b/QilYYX1h/luftibus">Trello Board</a></li>
-                <li class="list-group-item list-group-item-light"><a target="_blank" href="https://monitoring.solaredge.com/">SolarEdge Monitoring Protal</a></li>
-                <li class="list-group-item list-group-item-light"><a target="_blank" href="https://luftibus.herokuapp.com/">Prod Environment</a></li>
-                <li class="list-group-item list-group-item-light"><a target="_blank" href="http://localhost:8000/">Local Environment</a></li>
+                <li class="list-group-item list-group-item-light"><a target="_blank" href="https://monitoring.solaredge.com/">SolarEdge Monitoring Portal</a></li>
+                <li class="list-group-item list-group-item-light"><a target="_blank" href="https://luftibus.herokuapp.com/">luftibus Prod Environment</a></li>
+                <li class="list-group-item list-group-item-light"><a target="_blank" href="http://localhost:8000/">luftibus Local Environment</a></li>
                 <li class="list-group-item list-group-item-light"><a target="_blank" href="https://github.com/cesadom/solar_edge">GitHub Repository</a></li>
               </ul>
             </p>
