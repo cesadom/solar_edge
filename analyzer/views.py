@@ -12,6 +12,7 @@ APIID = getattr(settings, 'SEDGE_SITEID', None)
 # APIID = settings.solarEdgeID
 
 
+@login_required
 def home(request):
     form_submitted = False
     if 'APIKEY_input' in request.GET:
