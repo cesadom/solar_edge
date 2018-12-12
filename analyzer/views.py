@@ -10,8 +10,6 @@ import time
 
 APIKEY = getattr(settings, 'SEDGE_APIKEY', None)
 APIID = getattr(settings, 'SEDGE_SITEID', None)
-# APIKEY = settings.solarEdgeAPIKey
-# APIID = settings.solarEdgeID
 
 
 @login_required
@@ -29,6 +27,9 @@ def home(request):
         solarEdgeID = APIID
 
      
+    # CACHE EXAMPLE FROM https://simpleisbetterthancomplex.com/tutorial/2018/02/03/how-to-use-restful-apis-with-django.html ##
+    is_cached = ('api_res_site_overview' in request.session)
+    cashed_since = time.time() - request.session['cache_ts'] 
 
     ## TRY TO CACHE LIKE IN THIS EXAMPLE FROM https://simpleisbetterthancomplex.com/tutorial/2018/02/03/how-to-use-restful-apis-with-django.html ##
     # is_cached = ('geodata' in request.session)
