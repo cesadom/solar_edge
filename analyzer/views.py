@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 import solaredge
 import requests
+import time
 
 
 APIKEY = getattr(settings, 'SEDGE_APIKEY', None)
