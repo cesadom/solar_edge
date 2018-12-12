@@ -35,7 +35,7 @@ def home(request):
         cashed_since = time.time() - request.session['cache_ts'] 
 
     
-    if (not is_cached) or (cashed_since >= 7200):
+    if ((not is_cached) or (cashed_since >= 7200)) and (solarEdgeAPIKey != None):
         request.session['cache_ts'] = time.time()
         request.session['api_res_site_list'] = None
         request.session['api_res_site_details'] = None
