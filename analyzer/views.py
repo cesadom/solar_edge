@@ -31,11 +31,11 @@ def home(request):
     is_cached = ('api_res_site_overview' in request.session)
     cashed_since = None
 
-    if is_cached and solarEdgeID:
+    if is_cached and (solarEdgeAPIKey != None) and ('cache_ts' in request.session):
         cashed_since = time.time() - request.session['cache_ts'] 
 
     
-    if not is_cached or cashed_since >= 7200:
+    if (not is_cached) or (cashed_since >= 7200):
         request.session['cache_ts'] = time.time()
         request.session['api_res_site_list'] = None
         request.session['api_res_site_details'] = None
@@ -50,7 +50,6 @@ def home(request):
         request.session['api_res_site_envBenefits'] = None
         request.session['api_res_site_inventory'] = None
         request.session['api_res_equip_list'] = None
-
 
         try:
             api_adr_site_list='https://monitoringapi.solaredge.com/sites/list?api_key=' + solarEdgeAPIKey
