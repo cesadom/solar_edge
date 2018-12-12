@@ -31,7 +31,7 @@ def home(request):
     is_cached = ('api_res_site_overview' in request.session)
     cashed_since = None
 
-    if is_cached:
+    if is_cached and solarEdgeID:
         cashed_since = time.time() - request.session['cache_ts'] 
 
     
