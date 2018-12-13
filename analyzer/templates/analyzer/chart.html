@@ -1,5 +1,6 @@
 {% extends "analyzer/base.html" %}
 {% block content %}
+
 <!-- 
 EXAMPLE FROM https://stackoverflow.com/questions/44990517/displaying-json-data-in-chartjs
 var jsonfile = {
@@ -36,18 +37,17 @@ var chart = new Chart(ctx, config);
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
 <canvas id="canvas"></canvas>
  -->
-
-  <article class="media content-section">
-    <div class="media-body">
-      <canvas id="myChart" width="400" height="400"></canvas>
-      <script>
+    <article class="media content-section">
+      <div class="media-body">
+        <canvas id="myChart" width="400" height="400"></canvas>
+        <script>
         var ctx = document.getElementById("myChart");
         var myChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ["Waschmaschine", "Trockner", "Licht", "Herdplatte", "Spülmaschine", "Kaffeemaschine"],
+                labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
                 datasets: [{
-                    label: 'kW',
+                    label: '# of Votes',
                     data: [12, 19, 3, 5, 2, 3],
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.2)',
@@ -78,7 +78,7 @@ var chart = new Chart(ctx, config);
                 }
             }
         });
-      </script>
-    </div>
-  </article>
+        </script>
+      </div>
+    </article>
 {% endblock content %}

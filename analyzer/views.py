@@ -14,6 +14,17 @@ APIID = getattr(settings, 'SEDGE_SITEID', None)
 
 @login_required
 def home(request):
+    context = {
+        'title': 'Plain API'
+    }
+    return render(request, 'analyzer/home.html', context)
+
+@login_required
+def chart(request):
+    return render(request, 'analyzer/chart.html', {'title': 'Chart'})
+
+@login_required
+def api_plain(request):
     form_submitted = False
     if 'APIKEY_input' in request.GET:
         solarEdgeAPIKey = request.GET['APIKEY_input']
@@ -99,6 +110,7 @@ def home(request):
 
 
     context = {
+        'title': 'Plain API',
         'form_submitted': form_submitted,
         'API_results': {
             'is_cached': is_cached,
@@ -120,12 +132,11 @@ def home(request):
         'APIKEY': solarEdgeAPIKey,
         'APIID': solarEdgeID        
     }
-    return render(request, 'analyzer/home.html', context)
-
+    return render(request, 'analyzer/api_plain.html', context)
 
 def about(request):
     return render(request, 'analyzer/about.html', {'title': 'About'})
 
+@login_required
 def cron(request):
-    print('start cron')
     return HttpResponse('all done!')
