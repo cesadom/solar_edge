@@ -6,6 +6,7 @@ from django.conf import settings
 import solaredge
 import requests
 import time
+from datetime import datetime, timedelta
 
 
 APIKEY = getattr(settings, 'SEDGE_APIKEY', None)
@@ -33,9 +34,9 @@ def home(request):
         request.session['api_res_site_overview']=requests.get(api_adr_site_overview).json()
         api_adr_site_dataPeriod='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/dataPeriod?api_key=' + solarEdgeAPIKey
         request.session['api_res_site_dataPeriod']=requests.get(api_adr_site_dataPeriod).json()
-        api_adr_site_energy='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energy?timeUnit=DAY&endDate=2018-12-31&startDate=2018-12-01&api_key=' + solarEdgeAPIKey
+        api_adr_site_energy='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energy?timeUnit=DAY&startDate=' + (datetime.now() - timedelta(10)).strftime("%Y-%m-%d") + '&endDate=' + datetime.now().strftime("%Y-%m-%d") + '&api_key=' + solarEdgeAPIKey
         request.session['api_res_site_energy']=requests.get(api_adr_site_energy).json()
-        api_adr_site_energyDetails='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energyDetails?meters=PRODUCTION,CONSUMPTION&timeUnit=DAY&startTime=2018-12-01%2000:00:00&endTime=2018-12-07%2023:59:59&api_key=' + solarEdgeAPIKey
+        api_adr_site_energyDetails='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energyDetails?meters=PRODUCTION,CONSUMPTION&timeUnit=DAY&startTime=' + (datetime.now() - timedelta(10)).strftime("%Y-%m-%d") + '%2000:00:00&endTime=' + datetime.now().strftime("%Y-%m-%d") + '%2023:59:59&api_key=' + solarEdgeAPIKey
         request.session['api_res_site_energyDetails']=requests.get(api_adr_site_energyDetails).json()
     except:
         api_request_failed = True
@@ -54,8 +55,8 @@ def home(request):
             'api_res_site_details': api_res_site_details,
             'api_res_site_overview': api_res_site_overview,
             'api_res_site_dataPeriod': api_res_site_dataPeriod,
-            'api_adr_site_energy': api_adr_site_energy,
-            'api_adr_site_energyDetails': api_adr_site_energyDetails,
+            'api_res_site_energy': api_res_site_energy,
+            'api_res_site_energyDetails': api_res_site_energyDetails,
         },
     }
     return render(request, 'analyzer/home.html', context)

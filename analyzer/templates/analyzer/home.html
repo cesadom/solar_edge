@@ -1,5 +1,44 @@
 {% extends "analyzer/base.html" %}
 {% block content %}
+  <article class="media content-section">
+    <div class="media-body">
+      <div class="article-metadata">
+        <small class="text-muted"><b>SolarEdge Installation:</b> {{  API_results.api_res_site_details.details.name }}, <b>installation date:</b> {{  API_results.api_res_site_details.details.installationDate }}</small>
+      </div>
+      
+      <h2>Übersicht</h2>
+      <p>
+        <b>zuletzt aktualisiert am:</b> {{  API_results.api_res_site_overview.overview.lastUpdateTime }}
+      </p>
+      <p>
+        <b>Energie gesamt:</b> {{  API_results.api_res_site_overview.overview.lifeTimeData.energy }} Wh
+      </p>
+      <p>
+        <b>Energie in diesem Jahr:</b> {{  API_results.api_res_site_overview.overview.lastYearData.energy }} Wh
+      </p>
+      <p>
+        <b>Energie in diesem Monat:</b> {{  API_results.api_res_site_overview.overview.lastMonthData.energy }} Wh
+      </p>
+      <p>
+        <b>Energie heute:</b> {{  API_results.api_res_site_overview.overview.lastDayData.energy }} Wh
+      </p>
+      <p>
+        <b>Aktuelle Leistung:</b> {{  API_results.api_res_site_overview.overview.currentPower.power }} W
+      </p>
+
+      <h2>Produktion und Verbrauch der letzten 10 Tage</h2>
+
+<script>
+  var res_energyDetails = {{  API_results.api_res_site_energyDetails }}
+  var type = res_energyDetails.energyDetails.meters.map(function(e) {
+     return e.type;
+  });
+  var type_data = jsonfile.jsonarray.map(function(e) {
+     return e.values;
+  });;
+
+</script>
+
 <!-- 
 EXAMPLE FROM https://stackoverflow.com/questions/44990517/displaying-json-data-in-chartjs
 var jsonfile = {
@@ -35,14 +74,13 @@ var config = {
 var chart = new Chart(ctx, config);
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
 <canvas id="canvas"></canvas>
- -->
 
-  <article class="media content-section">
-    <div class="media-body">
+
       {% for API_result_key, API_result_value in API_results.items %}
         <p class="article-content"><strong> {{  API_result_key }} </strong></p>
         <p class="article-content"> {{  API_result_value }} </p>
       {% endfor %}
+ -->
 
       <canvas id="myChart" width="400" height="400"></canvas>
       <script>
@@ -84,10 +122,6 @@ var chart = new Chart(ctx, config);
             }
         });
       </script>
-      {% for API_result_key, API_result_value in API_results.items %}
-        <p class="article-content"><strong> {{  API_result_key }} </strong></p>
-        <p class="article-content"> {{  API_result_value }} </p>
-      {% endfor %}
     </div>
   </article>
 {% endblock content %}
