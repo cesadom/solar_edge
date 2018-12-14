@@ -39,6 +39,11 @@ var chart = new Chart(ctx, config);
 
   <article class="media content-section">
     <div class="media-body">
+      {% for API_result_key, API_result_value in API_results.items %}
+        <p class="article-content"><strong> {{  API_result_key }} </strong></p>
+        <p class="article-content"> {{  API_result_value }} </p>
+      {% endfor %}
+
       <canvas id="myChart" width="400" height="400"></canvas>
       <script>
         var ctx = document.getElementById("myChart");
@@ -79,6 +84,10 @@ var chart = new Chart(ctx, config);
             }
         });
       </script>
+      {% for API_result_key, API_result_value in API_results.items %}
+        <p class="article-content"><strong> {{  API_result_key }} </strong></p>
+        <p class="article-content"> {{  API_result_value }} </p>
+      {% endfor %}
     </div>
   </article>
 {% endblock content %}
