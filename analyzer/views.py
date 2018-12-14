@@ -11,20 +11,6 @@ import time
 APIKEY = getattr(settings, 'SEDGE_APIKEY', None)
 APIID = getattr(settings, 'SEDGE_SITEID', None)
 
-
-@login_required
-def home(request):
-    context = {
-        'title': 'Plain API'
-    }
-    return render(request, 'analyzer/home.html', context)
-
-@login_required
-def chart(request):
-    return render(request, 'analyzer/chart.html', {'title': 'Chart'})
-
-@login_required
-def api_plain(request):
     form_submitted = False
     if 'APIKEY_input' in request.GET:
         solarEdgeAPIKey = request.GET['APIKEY_input']
@@ -37,7 +23,43 @@ def api_plain(request):
     else:
         solarEdgeID = APIID
 
-     
+api_adr ='https://monitoringapi.solaredge.com/'
+
+@login_required
+def home(request):
+    try:
+        api_adr_site_details = api_adr + 'site/' + solarEdgeID + '/details?api_key=' + solarEdgeAPIKey
+        request.session['api_res_site_details']=requests.get(api_adr_site_details).json()
+        api_adr_site_overview='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/overview?api_key=' + solarEdgeAPIKey
+        request.session['api_res_site_overview']=requests.get(api_adr_site_overview).json()
+        api_adr_site_dataPeriod='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/dataPeriod?api_key=' + solarEdgeAPIKey
+        request.session['api_res_site_dataPeriod']=requests.get(api_adr_site_dataPeriod).json()
+        api_adr_site_energy='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energy?timeUnit=DAY&endDate=2018-12-31&startDate=2018-12-01&api_key=' + solarEdgeAPIKey
+        request.session['api_res_site_energy']=requests.get(api_adr_site_energy).json()
+        api_adr_site_energyDetails='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energyDetails?meters=PRODUCTION,CONSUMPTION&timeUnit=DAY&startTime=2018-12-01%2000:00:00&endTime=2018-12-07%2023:59:59&api_key=' + solarEdgeAPIKey
+        request.session['api_res_site_energyDetails']=requests.get(api_adr_site_energyDetails).json()
+    except:
+        api_request_failed = True
+        pass
+    
+    context = {
+        'title': 'Home',
+        'API_results': {
+            'is_cached': is_cached,
+            'cashed_since': cashed_since,
+            'api_res_site_list': api_res_site_list,
+            'api_res_site_details': api_res_site_details,
+            'api_res_site_overview': api_res_site_overview,
+        },
+    }
+    return render(request, 'analyzer/home.html', context)
+
+@login_required
+def chart(request):
+    return render(request, 'analyzer/chart.html', {'title': 'Chart'})
+
+@login_required
+def api_plain(request):
     # CACHE EXAMPLE FROM https://simpleisbetterthancomplex.com/tutorial/2018/02/03/how-to-use-restful-apis-with-django.html ##
     is_cached = ('api_res_site_overview' in request.session)
     cashed_since = None
