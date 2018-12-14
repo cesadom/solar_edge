@@ -11,8 +11,6 @@ import time
 APIKEY = getattr(settings, 'SEDGE_APIKEY', None)
 APIID = getattr(settings, 'SEDGE_SITEID', None)
 
-api_adr ='https://monitoringapi.solaredge.com/'
-
 @login_required
 def home(request):
     
@@ -29,7 +27,7 @@ def home(request):
        solarEdgeID = APIID
 
     try:
-        api_adr_site_details = api_adr + 'site/' + solarEdgeID + '/details?api_key=' + solarEdgeAPIKey
+        api_adr_site_details ='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/details?api_key=' + solarEdgeAPIKey
         request.session['api_res_site_details']=requests.get(api_adr_site_details).json()
         api_adr_site_overview ='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/overview?api_key=' + solarEdgeAPIKey
         request.session['api_res_site_overview']=requests.get(api_adr_site_overview).json()
