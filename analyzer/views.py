@@ -25,7 +25,7 @@ def home(request):
        solarEdgeID = request.GET['APIID_input']
     else:
        solarEdgeID = APIID
-
+    
     try:
         api_adr_site_details ='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/details?api_key=' + solarEdgeAPIKey
         request.session['api_res_site_details']=requests.get(api_adr_site_details).json()
@@ -41,17 +41,21 @@ def home(request):
         api_request_failed = True
         pass
     
+
+    api_res_site_details = request.session['api_res_site_details']
+    api_res_site_overview = request.session['api_res_site_overview']
+    api_res_site_dataPeriod = request.session['api_res_site_dataPeriod']
+    api_res_site_energy = request.session['api_res_site_energy']
+    api_res_site_energyDetails = request.session['api_res_site_energyDetails']
+
     context = {
         'title': 'Home',
         'API_results': {
-            'is_cached': is_cached,
-            'cashed_since': cashed_since,
-            'api_res_site_list': request.session['api_res_site_list'],
-            'api_res_site_details': request.session['api_res_site_details'],
-            'api_res_site_overview': request.session['api_res_site_overview'],
-            'api_res_site_dataPeriod': request.session['api_res_site_dataPeriod'],
-            'api_adr_site_energy': request.session['api_adr_site_energy'],
-            'api_adr_site_energyDetails': request.session['api_adr_site_energyDetails'],
+            'api_res_site_details': api_res_site_details,
+            'api_res_site_overview': api_res_site_overview,
+            'api_res_site_dataPeriod': api_res_site_dataPeriod,
+            'api_adr_site_energy': api_adr_site_energy,
+            'api_adr_site_energyDetails': api_adr_site_energyDetails,
         },
     }
     return render(request, 'analyzer/home.html', context)
