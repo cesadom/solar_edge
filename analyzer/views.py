@@ -11,22 +11,23 @@ import time
 APIKEY = getattr(settings, 'SEDGE_APIKEY', None)
 APIID = getattr(settings, 'SEDGE_SITEID', None)
 
-form_submitted = False
-if 'APIKEY_input' in request.GET:
-    solarEdgeAPIKey = request.GET['APIKEY_input']
-    form_submitted = True
-else:
-    solarEdgeAPIKey = APIKEY
-
-if 'APIID_input' in request.GET:
-    solarEdgeID = request.GET['APIID_input']
-else:
-    solarEdgeID = APIID
-
 api_adr ='https://monitoringapi.solaredge.com/'
 
 @login_required
 def home(request):
+    
+    form_submitted = False
+    if 'APIKEY_input' in request.GET:
+        solarEdgeAPIKey = request.GET['APIKEY_input']
+        form_submitted = True
+    else:
+        solarEdgeAPIKey = APIKEY
+
+    if 'APIID_input' in request.GET:
+       solarEdgeID = request.GET['APIID_input']
+    else:
+       solarEdgeID = APIID
+
     try:
         api_adr_site_details = api_adr + 'site/' + solarEdgeID + '/details?api_key=' + solarEdgeAPIKey
         request.session['api_res_site_details']=requests.get(api_adr_site_details).json()
@@ -63,6 +64,18 @@ def chart(request):
 
 @login_required
 def api_plain(request):
+    form_submitted = False
+    if 'APIKEY_input' in request.GET:
+        solarEdgeAPIKey = request.GET['APIKEY_input']
+        form_submitted = True
+    else:
+        solarEdgeAPIKey = APIKEY
+
+    if 'APIID_input' in request.GET:
+       solarEdgeID = request.GET['APIID_input']
+    else:
+       solarEdgeID = APIID
+
     # CACHE EXAMPLE FROM https://simpleisbetterthancomplex.com/tutorial/2018/02/03/how-to-use-restful-apis-with-django.html ##
     is_cached = ('api_res_site_overview' in request.session)
     cashed_since = None
