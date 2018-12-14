@@ -11,17 +11,17 @@ import time
 APIKEY = getattr(settings, 'SEDGE_APIKEY', None)
 APIID = getattr(settings, 'SEDGE_SITEID', None)
 
-    form_submitted = False
-    if 'APIKEY_input' in request.GET:
-        solarEdgeAPIKey = request.GET['APIKEY_input']
-        form_submitted = True
-    else:
-        solarEdgeAPIKey = APIKEY
-    
-    if 'APIID_input' in request.GET:
-        solarEdgeID = request.GET['APIID_input']
-    else:
-        solarEdgeID = APIID
+form_submitted = False
+if 'APIKEY_input' in request.GET:
+    solarEdgeAPIKey = request.GET['APIKEY_input']
+    form_submitted = True
+else:
+    solarEdgeAPIKey = APIKEY
+
+if 'APIID_input' in request.GET:
+    solarEdgeID = request.GET['APIID_input']
+else:
+    solarEdgeID = APIID
 
 api_adr ='https://monitoringapi.solaredge.com/'
 
