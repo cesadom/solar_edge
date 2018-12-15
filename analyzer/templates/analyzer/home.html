@@ -1,4 +1,20 @@
 {% extends "analyzer/base.html" %}
+
+<script>
+{% block js %}
+  // var res_energyDetails = content.API_results.api_res_site_energyDetails
+  // var res_energyUnit = res_energyDetails.unit
+  // var res_energyTimeUnit = res_energyDetails.timeUnit
+  // var res_energyType = res_energyDetails.energyDetails.meters.map(function(e) {
+  //    return e.type;
+  // });
+  // var res_energyTypeData = jsonfile.jsonarray.map(function(e) {
+  //    return e.values;
+  // });
+
+{% endblock %}
+</script>
+
 {% block content %}
   <article class="media content-section">
     <div class="media-body">
@@ -28,16 +44,6 @@
 
       <h2>Produktion und Verbrauch der letzten 10 Tage</h2>
 
-<script>
-  var res_energyDetails = {{  API_results.api_res_site_energyDetails }}
-  var type = res_energyDetails.energyDetails.meters.map(function(e) {
-     return e.type;
-  });
-  var type_data = jsonfile.jsonarray.map(function(e) {
-     return e.values;
-  });;
-
-</script>
 
 <!-- 
 EXAMPLE FROM https://stackoverflow.com/questions/44990517/displaying-json-data-in-chartjs
