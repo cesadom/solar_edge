@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 
 from django.conf import settings
@@ -60,6 +60,52 @@ def home(request):
         },
     }
     return render(request, 'analyzer/home.html', context)
+
+def get_data(request, *args, **kwargs):
+    form_submitted = False
+    if 'APIKEY_input' in request.GET:
+        solarEdgeAPIKey = request.GET['APIKEY_input']
+        form_submitted = True
+    else:
+        solarEdgeAPIKey = APIKEY
+
+    if 'APIID_input' in request.GET:
+       solarEdgeID = request.GET['APIID_input']
+    else:
+       solarEdgeID = APIID
+    
+    try:
+        api_adr_site_details ='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/details?api_key=' + solarEdgeAPIKey
+        request.session['api_res_site_details']=requests.get(api_adr_site_details).json()
+        api_adr_site_overview ='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/overview?api_key=' + solarEdgeAPIKey
+        request.session['api_res_site_overview']=requests.get(api_adr_site_overview).json()
+        api_adr_site_dataPeriod='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/dataPeriod?api_key=' + solarEdgeAPIKey
+        request.session['api_res_site_dataPeriod']=requests.get(api_adr_site_dataPeriod).json()
+        api_adr_site_energy='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energy?timeUnit=DAY&startDate=' + (datetime.now() - timedelta(10)).strftime("%Y-%m-%d") + '&endDate=' + datetime.now().strftime("%Y-%m-%d") + '&api_key=' + solarEdgeAPIKey
+        request.session['api_res_site_energy']=requests.get(api_adr_site_energy).json()
+        api_adr_site_energyDetails='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energyDetails?meters=PRODUCTION,CONSUMPTION&timeUnit=DAY&startTime=' + (datetime.now() - timedelta(10)).strftime("%Y-%m-%d") + '%2000:00:00&endTime=' + datetime.now().strftime("%Y-%m-%d") + '%2023:59:59&api_key=' + solarEdgeAPIKey
+        request.session['api_res_site_energyDetails']=requests.get(api_adr_site_energyDetails).json()
+    except:
+        api_request_failed = True
+        pass
+    
+
+    api_res_site_details = request.session['api_res_site_details']
+    api_res_site_overview = request.session['api_res_site_overview']
+    api_res_site_dataPeriod = request.session['api_res_site_dataPeriod']
+    api_res_site_energy = request.session['api_res_site_energy']
+    api_res_site_energyDetails = request.session['api_res_site_energyDetails']
+
+    context = {
+        'API_results': {
+            'api_res_site_details': api_res_site_details,
+            'api_res_site_overview': api_res_site_overview,
+            'api_res_site_dataPeriod': api_res_site_dataPeriod,
+            'api_res_site_energy': api_res_site_energy,
+            'api_res_site_energyDetails': api_res_site_energyDetails,
+        },
+    }
+    return JsonResponse(context) # http response
 
 @login_required
 def chart(request):
