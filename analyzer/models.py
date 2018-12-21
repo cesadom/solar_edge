@@ -1,17 +1,31 @@
 from django.db import models
+from django.utils import timezone
 
 class SolarSystem(models.Model):
-    id=None
-    apiSiteIdList=None
-    name=None
-    address=None
+    apiSiteId = models.CharField(max_length=100)
+    name = models.CharField(max_length=100)
+    address = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name
+
 
 class SolarModule(models.Model):
-    id=None
-    solModuleType=None
-    description=None
+    solSystem = models.ForeignKey(SolarSystem, on_delete=models.CASCADE)
+    solModuleType = models.CharField(max_length=100)
+    name = models.CharField(max_length=100)
+    
+    def __str__(self):
+        return self.name
+
 
 class SolarMeasurement(models.Model):
-    id=None
-    solModuleId=None
-    time=None
+    solModule = models.ForeignKey(SolarModule, on_delete=models.CASCADE)
+    time = models.DateTimeField(default=timezone.now)
+    timeUnit = models.CharField(max_length=10)
+    unit = models.CharField(max_length=10)
+    energyProduction = models.PositiveIntegerField(default=0)
+    energyConsumtion = models.PositiveIntegerField(default=0)
+    
+    def __str__(self):
+        return self.time + ": " + self.energyProduction + ", " + self.energyConsumtion

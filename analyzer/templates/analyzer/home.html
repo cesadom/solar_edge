@@ -9,7 +9,7 @@
       method: "GET",
       url: endpoint,
       success: function(data){
-          var res_energyTimeUnit = data.energyDetails.timeUnit
+          // var res_energyTimeUnit = data.energyDetails.timeUnit
           var res_energyType = data.energyDetails.meters.map(function(e) {
              return e.type;
           });

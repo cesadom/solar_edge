@@ -127,7 +127,7 @@ def api_plain(request):
 
     # CACHE EXAMPLE FROM https://simpleisbetterthancomplex.com/tutorial/2018/02/03/how-to-use-restful-apis-with-django.html ##
     is_cached = ('api_res_site_overview' in request.session)
-    cashed_since = None
+    cashed_since = 10000000000
 
     if is_cached and (solarEdgeAPIKey != None) and ('cache_ts' in request.session):
         cashed_since = time.time() - request.session['cache_ts'] 
