@@ -29,3 +29,14 @@ class SolarMeasurement(models.Model):
     
     def __str__(self):
         return self.time + ": " + self.energyProduction + ", " + self.energyConsumtion
+
+class SolarLiveData(models.Model):
+    solModule = models.ForeignKey(SolarModule, on_delete=models.CASCADE)
+    time = models.DateTimeField(default=timezone.now)
+    timeUnit = models.CharField(max_length=10)
+    unit = models.CharField(max_length=10)
+    energyProduction = models.PositiveIntegerField(default=0)
+    energyConsumtion = models.PositiveIntegerField(default=0)
+    
+    def __str__(self):
+        return self.time + ": " + self.energyProduction + ", " + self.energyConsumtion
