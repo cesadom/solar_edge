@@ -42,6 +42,15 @@ def home(request):
         api_request_failed = True
         pass
     
+“””
+    sMeasurement=SolarMeasurement(None, 
+    solModule = models.ForeignKey(SolarModule, on_delete=models.CASCADE)
+    time = models.DateTimeField(default=timezone.now)
+    timeUnit = models.CharField(max_length=10)
+    unit = models.CharField(max_length=10)
+    energyProduction = models.PositiveIntegerField(default=0)
+    energyConsumtion 
+“””
 
     api_res_site_details = request.session['api_res_site_details']
     api_res_site_overview = request.session['api_res_site_overview']
