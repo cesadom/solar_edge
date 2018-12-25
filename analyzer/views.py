@@ -42,15 +42,25 @@ def home(request):
         api_request_failed = True
         pass
     
-“””
-    sMeasurement=SolarMeasurement(None, 
-    solModule = models.ForeignKey(SolarModule, on_delete=models.CASCADE)
+    “””
+    
+    solarEnergyDetails = request.session['api_res_site_energyDetails']
+    meterTelemetryConsumption = solarEnergyDetails.<meters>.<meterTelemetries>.<type>Consumption</type>
+    meterTelemetryProduction = solarEnergyDetails.<meters>.<meterTelemetries>.<type>Production</type>
+    for consumptionValue in meterTelemetryConsumption:
+        sMeasurement=SolarMeasurement(None, consumptionValue.date, solarEnergyDetails.timeUnit, solarEnergyDetails.unit, None, consumptionValue.value)
+        sMeasurement.save()
+    for productionValue in meterTelemetryProduction:
+        sMeasurement=SolarMeasurement(filter=productionValue.time)
+        sMeasurement.energyProduction = productionValue.value
+        sMeasurement.save()
+    
     time = models.DateTimeField(default=timezone.now)
     timeUnit = models.CharField(max_length=10)
     unit = models.CharField(max_length=10)
     energyProduction = models.PositiveIntegerField(default=0)
     energyConsumtion 
-“””
+    “””
 
     api_res_site_details = request.session['api_res_site_details']
     api_res_site_overview = request.session['api_res_site_overview']
