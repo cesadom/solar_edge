@@ -1,21 +1,28 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
+from .models import SolarSystem, SolarModule, SolarMeasurement, SolarLiveData
+from django.utils import timezone
 
 from django.conf import settings
 import solaredge
 import requests
 import time
 from datetime import datetime, timedelta
+import dateutil.parser
 
 
+# Load API Key and API Site ID from Configuration. Else --> set to None
 APIKEY = getattr(settings, 'SEDGE_APIKEY', None)
 APIID = getattr(settings, 'SEDGE_SITEID', None)
 
 @login_required
 def home(request):
     
+    # Initialize variable to check if form has been submited 
     form_submitted = False
+
+    # Load API Key and API Site ID from submitted form. Else --> preset from Config or set to None
     if 'APIKEY_input' in request.GET:
         solarEdgeAPIKey = request.GET['APIKEY_input']
         form_submitted = True
@@ -27,6 +34,8 @@ def home(request):
     else:
        solarEdgeID = APIID
     
+    # Try to load data from API
+    api_request_success = True
     try:
         api_adr_site_details ='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/details?api_key=' + solarEdgeAPIKey
         request.session['api_res_site_details']=requests.get(api_adr_site_details).json()
@@ -39,28 +48,56 @@ def home(request):
         api_adr_site_energyDetails='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energyDetails?meters=PRODUCTION,CONSUMPTION&timeUnit=DAY&startTime=' + (datetime.now() - timedelta(10)).strftime("%Y-%m-%d") + '%2000:00:00&endTime=' + datetime.now().strftime("%Y-%m-%d") + '%2023:59:59&api_key=' + solarEdgeAPIKey
         request.session['api_res_site_energyDetails']=requests.get(api_adr_site_energyDetails).json()
     except:
-        api_request_failed = True
+        api_request_success = False
         pass
     
-    “””
+    # Parse API 'energyDetails' for Consumption & Production meter values
+    solarEnergyDetails = request.session['api_res_site_energyDetails']['energyDetails']
+    print('api_request_success:')
+    print(api_request_success)
+    for meterTelemetry in solarEnergyDetails['meters']:
+        if meterTelemetry['type'] == 'Consumption':
+            meterTelemetryConsumption = meterTelemetry['values']
+            print('meterTelemetryConsumption:')
+            print(meterTelemetryConsumption)
+        elif meterTelemetry['type'] == 'Production':
+            meterTelemetryProduction = meterTelemetry['values']
+            print('meterTelemetryProduction:')
+            print(meterTelemetryProduction)
+
+    # Parse Consumption & Production meter values and write data into SolarMeasurement Model
+    model_write_success = True
+    try:
+        for consumptionValue in meterTelemetryConsumption:
+            sMeasurement, created = SolarMeasurement.objects.get_or_create(time=dateutil.parser.parse(consumptionValue['date']), defaults={'timeUnit': solarEnergyDetails['timeUnit'], 'unit': solarEnergyDetails['unit'], 'energyConsumtion': consumptionValue['value']})
+            # sMeasurement.save()
+            print('consumptionValue:')
+            print(sMeasurement)
+            print('created:')
+            print(created)
+        # NEED TO CONTINUE HERE
+        # for productionValue in meterTelemetryProduction:
+        #     sMeasurement = SolarMeasurement.objects.filter(time=dateutil.parser.parse(productionValue['time']))
+        #     # if not sMeasurement:
+        #     #     raise ValueError('Unexpacted missing value for given time: ' + productionValue['time'])
+        #     sMeasurement.energyProduction = productionValue['value']
+        #     # sMeasurement.save()
+        #     print('productionValue:')
+        #     print(sMeasurement)
+    except:
+        pass
+        model_write_success = False
+
+    print('model_write_success:')
+    print(model_write_success)
     
-    solarEnergyDetails = request.session['api_res_site_energyDetails']
-    meterTelemetryConsumption = solarEnergyDetails.<meters>.<meterTelemetries>.<type>Consumption</type>
-    meterTelemetryProduction = solarEnergyDetails.<meters>.<meterTelemetries>.<type>Production</type>
-    for consumptionValue in meterTelemetryConsumption:
-        sMeasurement=SolarMeasurement(None, consumptionValue.date, solarEnergyDetails.timeUnit, solarEnergyDetails.unit, None, consumptionValue.value)
-        sMeasurement.save()
-    for productionValue in meterTelemetryProduction:
-        sMeasurement=SolarMeasurement(filter=productionValue.time)
-        sMeasurement.energyProduction = productionValue.value
-        sMeasurement.save()
-    
+    """
     time = models.DateTimeField(default=timezone.now)
     timeUnit = models.CharField(max_length=10)
     unit = models.CharField(max_length=10)
     energyProduction = models.PositiveIntegerField(default=0)
     energyConsumtion 
-    “””
+    """
 
     api_res_site_details = request.session['api_res_site_details']
     api_res_site_overview = request.session['api_res_site_overview']
@@ -92,7 +129,8 @@ def get_data(request, *args, **kwargs):
        solarEdgeID = request.GET['APIID_input']
     else:
        solarEdgeID = APIID
-    
+       
+    api_request_success = True
     try:
         api_adr_site_details ='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/details?api_key=' + solarEdgeAPIKey
         request.session['api_res_site_details']=requests.get(api_adr_site_details).json()
@@ -105,7 +143,7 @@ def get_data(request, *args, **kwargs):
         api_adr_site_energyDetails='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energyDetails?meters=PRODUCTION,CONSUMPTION&timeUnit=DAY&startTime=' + (datetime.now() - timedelta(10)).strftime("%Y-%m-%d") + '%2000:00:00&endTime=' + datetime.now().strftime("%Y-%m-%d") + '%2023:59:59&api_key=' + solarEdgeAPIKey
         request.session['api_res_site_energyDetails']=requests.get(api_adr_site_energyDetails).json()
     except:
-        api_request_failed = True
+        api_request_success = False
         pass
     
 
