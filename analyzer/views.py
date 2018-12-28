@@ -45,7 +45,7 @@ def home(request):
         request.session['api_res_site_dataPeriod']=requests.get(api_adr_site_dataPeriod).json()
         api_adr_site_energy='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energy?timeUnit=DAY&startDate=' + (datetime.now() - timedelta(10)).strftime("%Y-%m-%d") + '&endDate=' + datetime.now().strftime("%Y-%m-%d") + '&api_key=' + solarEdgeAPIKey
         request.session['api_res_site_energy']=requests.get(api_adr_site_energy).json()
-        api_adr_site_energyDetails='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energyDetails?meters=PRODUCTION,CONSUMPTION&timeUnit=DAY&startTime=' + (datetime.now() - timedelta(10)).strftime("%Y-%m-%d") + '%2000:00:00&endTime=' + datetime.now().strftime("%Y-%m-%d") + '%2023:59:59&api_key=' + solarEdgeAPIKey
+        api_adr_site_energyDetails='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energyDetails?meters=PRODUCTION,CONSUMPTION&timeUnit=DAY&startTime=' + (datetime.now() - timedelta(350)).strftime("%Y-%m-%d") + '%2000:00:00&endTime=' + datetime.now().strftime("%Y-%m-%d") + '%2023:59:59&api_key=' + solarEdgeAPIKey
         request.session['api_res_site_energyDetails']=requests.get(api_adr_site_energyDetails).json()
     except:
         api_request_success = False
@@ -69,21 +69,33 @@ def home(request):
     model_write_success = True
     try:
         for consumptionValue in meterTelemetryConsumption:
-            sMeasurement, created = SolarMeasurement.objects.get_or_create(time=dateutil.parser.parse(consumptionValue['date']), defaults={'timeUnit': solarEnergyDetails['timeUnit'], 'unit': solarEnergyDetails['unit'], 'energyConsumtion': consumptionValue['value']})
-            # sMeasurement.save()
-            print('consumptionValue:')
-            print(sMeasurement)
-            print('created:')
-            print(created)
-        # NEED TO CONTINUE HERE
-        # for productionValue in meterTelemetryProduction:
-        #     sMeasurement = SolarMeasurement.objects.filter(time=dateutil.parser.parse(productionValue['time']))
-        #     # if not sMeasurement:
-        #     #     raise ValueError('Unexpacted missing value for given time: ' + productionValue['time'])
-        #     sMeasurement.energyProduction = productionValue['value']
-        #     # sMeasurement.save()
-        #     print('productionValue:')
-        #     print(sMeasurement)
+            if 'value' in consumptionValue:
+                sMeasurement, created = SolarMeasurement.objects.get_or_create(time=dateutil.parser.parse(consumptionValue['date']), defaults={'timeUnit': solarEnergyDetails['timeUnit'], 'unit': solarEnergyDetails['unit'], 'energyConsumtion': consumptionValue['value']})
+                sMeasurement.save()
+                print('consumptionValue:')
+                print(consumptionValue)
+                print('---- sMeasurement:')
+                print(sMeasurement)
+                print('created:')
+                print(created)
+        for productionValue in meterTelemetryProduction:
+            if 'value' in productionValue:
+                print('---- productionValue:')
+                print(productionValue)
+                sMeasurement = SolarMeasurement.objects.filter(time=dateutil.parser.parse(productionValue['date']))
+                print('---- BEFORE sMeasurement:')
+                print(sMeasurement)
+                if not sMeasurement:
+                    print('---- ERROR: MISSING ENTRY IN PRODUCTION LIST ----')
+                    # raise ValueError('Unexpacted missing value for given time: ' + productionValue['time'])
+                # NOTE: CONTINUE HERE AND TRY TO SKIP UPDATE IF VALUE ALREADY UPDATED
+                # if not sMeasurement.values('value').first():
+                #     sMeasurement.update(energyProduction = productionValue['value'])
+                #     print('---- AFTER sMeasurement:')
+                #     print(sMeasurement)
+                # else:
+                #     print('---- NO UPDATE sMeasurement:')
+                   
     except:
         pass
         model_write_success = False
