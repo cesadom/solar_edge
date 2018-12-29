@@ -89,6 +89,8 @@ def home(request):
                     print('---- ERROR: MISSING ENTRY IN PRODUCTION LIST ----')
                     # raise ValueError('Unexpacted missing value for given time: ' + productionValue['time'])
                 # NOTE: CONTINUE HERE AND TRY TO SKIP UPDATE IF VALUE ALREADY UPDATED
+                
+                print(sMeasurement.values('value').first())
                 # if not sMeasurement.values('value').first():
                 #     sMeasurement.update(energyProduction = productionValue['value'])
                 #     print('---- AFTER sMeasurement:')
