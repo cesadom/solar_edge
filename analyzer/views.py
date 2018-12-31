@@ -58,52 +58,68 @@ def home(request):
     for meterTelemetry in solarEnergyDetails['meters']:
         if meterTelemetry['type'] == 'Consumption':
             meterTelemetryConsumption = meterTelemetry['values']
-            print('meterTelemetryConsumption:')
-            print(meterTelemetryConsumption)
+            # print('meterTelemetryConsumption:')
+            # print(meterTelemetryConsumption)
+            
+            ## Delete the last item of the list == today, as it is not yet the final value
+            del meterTelemetryConsumption[-1]
+            # print('--- meterTelemetryConsumption W/O today:')
+            # print(meterTelemetryConsumption)
         elif meterTelemetry['type'] == 'Production':
             meterTelemetryProduction = meterTelemetry['values']
-            print('meterTelemetryProduction:')
-            print(meterTelemetryProduction)
+            # print('meterTelemetryProduction:')
+            # print(meterTelemetryProduction)
+
+            ## Delete the last item of the list == today, as it is not yet the final value
+            del meterTelemetryProduction[-1]
+            # print('--- meterTelemetryProduction W/O today:')
+            # print(meterTelemetryProduction)
+            
 
     # Parse Consumption & Production meter values and write data into SolarMeasurement Model
     model_write_success = True
+    meterTelemetry_added = False
     try:
         for consumptionValue in meterTelemetryConsumption:
             if 'value' in consumptionValue:
                 sMeasurement, created = SolarMeasurement.objects.get_or_create(time=dateutil.parser.parse(consumptionValue['date']), defaults={'timeUnit': solarEnergyDetails['timeUnit'], 'unit': solarEnergyDetails['unit'], 'energyConsumtion': consumptionValue['value']})
                 sMeasurement.save()
-                print('consumptionValue:')
-                print(consumptionValue)
-                print('---- sMeasurement:')
-                print(sMeasurement)
-                print('created:')
-                print(created)
+                # print('consumptionValue:')
+                # print(consumptionValue)
+                # print('---- sMeasurement:')
+                # print(sMeasurement)
+                # print('created:')
+                # print(created)
         for productionValue in meterTelemetryProduction:
             if 'value' in productionValue:
-                print('---- productionValue:')
-                print(productionValue)
+                # print('---- productionValue:')
+                # print(productionValue)
                 sMeasurement = SolarMeasurement.objects.filter(time=dateutil.parser.parse(productionValue['date']))
-                print('---- BEFORE sMeasurement:')
-                print(sMeasurement)
+                # print('---- BEFORE sMeasurement:')
+                # print(sMeasurement)
                 if not sMeasurement:
                     print('---- ERROR: MISSING ENTRY IN PRODUCTION LIST ----')
                     # raise ValueError('Unexpacted missing value for given time: ' + productionValue['time'])
-                # NOTE: CONTINUE HERE AND TRY TO SKIP UPDATE IF VALUE ALREADY UPDATED
                 
-                print(sMeasurement.values('value').first())
-                # if not sMeasurement.values('value').first():
-                #     sMeasurement.update(energyProduction = productionValue['value'])
-                #     print('---- AFTER sMeasurement:')
-                #     print(sMeasurement)
+                # SKIP UPDATE IF VALUE ALREADY UPDATED
+                # print(sMeasurement.values('energyProduction')[0]['energyProduction'])
+                if not sMeasurement.values('energyProduction')[0]['energyProduction']:
+                    sMeasurement.update(energyProduction = productionValue['value'])
+                    meterTelemetry_added = True
+                    # print('---- AFTER sMeasurement:')
+                    # print(sMeasurement)
                 # else:
-                #     print('---- NO UPDATE sMeasurement:')
+                    # print('---- NO UPDATE sMeasurement:')
                    
-    except:
+    except Exception as e:
         pass
         model_write_success = False
-
+        print (e, type(e))
+    
     print('model_write_success:')
     print(model_write_success)
+    print('meterTelemetry_added:')
+    print(meterTelemetry_added)
     
     """
     time = models.DateTimeField(default=timezone.now)
@@ -198,13 +214,13 @@ def api_plain(request):
 
     # CACHE EXAMPLE FROM https://simpleisbetterthancomplex.com/tutorial/2018/02/03/how-to-use-restful-apis-with-django.html ##
     is_cached = ('api_res_site_overview' in request.session)
-    cashed_since = 10000000000
+    cashed_since = 10
 
     if is_cached and (solarEdgeAPIKey != None) and ('cache_ts' in request.session):
         cashed_since = time.time() - request.session['cache_ts'] 
 
     
-    if (not is_cached) or (cashed_since >= 7200) or request.session['api_res_site_overview'] == None:
+    if (not is_cached) or (cashed_since >= 20) or request.session['api_res_site_overview'] == None:
         request.session['cache_ts'] = time.time()
         request.session['api_res_site_list'] = None
         request.session['api_res_site_details'] = None
