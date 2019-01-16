@@ -28,15 +28,12 @@ class SolarMeasurement(models.Model):
     energyConsumtion = models.PositiveIntegerField(default=None, blank=True, null=True)
     
     def __str__(self):
-        return str(self.time) + ": " + str(self.energyProduction) + ", " + str(self.energyConsumtion)
+        return str(self.time) + " - energy production: " + str(self.energyProduction) + " " + self.unit + " per " + self.timeUnit + ", energy consumtion: " + str(self.energyConsumtion) + " " + self.unit + " per " + self.timeUnit
 
-class SolarLiveData(models.Model):
-    solModule = models.ForeignKey(SolarModule, on_delete=models.CASCADE, blank=True, null=True)
-    time = models.DateTimeField(default=timezone.now)
-    timeUnit = models.CharField(max_length=10)
-    unit = models.CharField(max_length=10)
-    energyProduction = models.PositiveIntegerField(default=None, blank=True, null=True)
-    energyConsumtion = models.PositiveIntegerField(default=None, blank=True, null=True)
+class Item(models.Model):
+    name = models.CharField(max_length=30)
+    description = models.TextField()
+    wattHours = models.PositiveIntegerField(default=None, blank=True, null=True)
     
     def __str__(self):
-        return self.time + ": " + self.energyProduction + ", " + self.energyConsumtion
+        return self.name + " - " + self.description + ", " + str(self.wattHours) + "wh"

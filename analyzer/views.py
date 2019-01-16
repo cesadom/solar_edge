@@ -1,10 +1,10 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
-from .models import SolarSystem, SolarModule, SolarMeasurement, SolarLiveData
 from django.utils import timezone
-
 from django.conf import settings
+from .models import SolarSystem, SolarModule, SolarMeasurement, Item
+import simulator as simu
 import solaredge
 import requests
 import time
@@ -216,11 +216,20 @@ def api_plain(request):
 
     # CACHE EXAMPLE FROM https://simpleisbetterthancomplex.com/tutorial/2018/02/03/how-to-use-restful-apis-with-django.html ##
     is_cached = ('api_res_site_overview' in request.session)
-    cashed_since = 10
+    print('is_cached:')
+    print(is_cached)
+    # cashed_since = 100
 
     if is_cached and (solarEdgeAPIKey != None) and ('cache_ts' in request.session):
         cashed_since = time.time() - request.session['cache_ts'] 
 
+    try:
+        print('cashed_since:')
+        print(cashed_since)
+        print('request.session[api_res_site_overview]:')
+        print(request.session['api_res_site_overview'])
+    except:
+        pass
     
     if (not is_cached) or (cashed_since >= 20) or request.session['api_res_site_overview'] == None:
         request.session['cache_ts'] = time.time()
@@ -268,7 +277,6 @@ def api_plain(request):
         except:
             pass
 
-
     api_res_site_list = request.session['api_res_site_list']
     api_res_site_details = request.session['api_res_site_details']
     api_res_site_overview = request.session['api_res_site_overview']
@@ -315,4 +323,5 @@ def about(request):
 
 @login_required
 def cron(request):
+    # simu.sunnydays(datetime.now, datetime.now() + timedelta(10))
     return HttpResponse('all done!')
