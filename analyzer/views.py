@@ -45,14 +45,16 @@ def home(request):
         request.session['api_res_site_dataPeriod']=requests.get(api_adr_site_dataPeriod).json()
         api_adr_site_energy='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energy?timeUnit=DAY&startDate=' + (datetime.now() - timedelta(10)).strftime("%Y-%m-%d") + '&endDate=' + datetime.now().strftime("%Y-%m-%d") + '&api_key=' + solarEdgeAPIKey
         request.session['api_res_site_energy']=requests.get(api_adr_site_energy).json()
-        api_adr_site_energyDetails='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energyDetails?meters=PRODUCTION,CONSUMPTION&timeUnit=DAY&startTime=' + (datetime.now() - timedelta(350)).strftime("%Y-%m-%d") + '%2000:00:00&endTime=' + datetime.now().strftime("%Y-%m-%d") + '%2023:59:59&api_key=' + solarEdgeAPIKey
-        request.session['api_res_site_energyDetails']=requests.get(api_adr_site_energyDetails).json()
+        api_adr_site_energyDetails_DAY='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energyDetails?meters=PRODUCTION,CONSUMPTION&timeUnit=DAY&startTime=' + (datetime.now() - timedelta(350)).strftime("%Y-%m-%d") + '%2000:00:00&endTime=' + datetime.now().strftime("%Y-%m-%d") + '%2023:59:59&api_key=' + solarEdgeAPIKey
+        request.session['api_res_site_energyDetails_DAY']=requests.get(api_adr_site_energyDetails_DAY).json()
+        api_adr_site_energyDetails_QUART_HOUR='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energyDetails?meters=PRODUCTION,CONSUMPTION&timeUnit=QUARTER_OF_AN_HOUR&startTime=' + (datetime.now() - timedelta(350)).strftime("%Y-%m-%d") + '%2000:00:00&endTime=' + datetime.now().strftime("%Y-%m-%d") + '%2023:59:59&api_key=' + solarEdgeAPIKey
+        request.session['api_res_site_energyDetails_QUART_HOUR']=requests.get(api_adr_site_energyDetails_QUART_HOUR).json()
     except:
         api_request_success = False
         pass
     
     # Parse API 'energyDetails' for Consumption & Production meter values
-    solarEnergyDetails = request.session['api_res_site_energyDetails']['energyDetails']
+    solarEnergyDetails = request.session['api_res_site_energyDetails_DAY']['energyDetails']
     print('api_request_success:')
     print(api_request_success)
     for meterTelemetry in solarEnergyDetails['meters']:
@@ -133,7 +135,7 @@ def home(request):
     api_res_site_overview = request.session['api_res_site_overview']
     api_res_site_dataPeriod = request.session['api_res_site_dataPeriod']
     api_res_site_energy = request.session['api_res_site_energy']
-    api_res_site_energyDetails = request.session['api_res_site_energyDetails']
+    api_res_site_energyDetails = request.session['api_res_site_energyDetails_DAY']
 
     context = {
         'title': 'Home',
