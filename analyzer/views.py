@@ -19,8 +19,8 @@ APIID = getattr(settings, 'SEDGE_SITEID', None)
 # Load worldweatheronline.com API Key and Configuration
 weatherAPIKEY = "cdb9121d690f43aca7a110709191801"
 weatherAPILocation = "Meilen"
-weatherAPIForecastDays = str(15)
-weatherAPIURL = "http://api.worldweatheronline.com/premium/v1/weather.ashx?key=" + weatherAPIKEY + "&q=" + weatherAPILocation + "&format=json&num_of_days=" + weatherAPIForecastDays
+#weatherAPIForecastDays = str(15)
+weatherAPIURL = "http://api.worldweatheronline.com/premium/v1/weather.ashx?key=" + weatherAPIKEY + "&q=" + weatherAPILocation + "&format=json&num_of_days=5"
 
 @login_required
 def home(request):
