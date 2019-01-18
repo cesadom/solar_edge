@@ -12,9 +12,15 @@ from datetime import datetime, timedelta
 import dateutil.parser
 
 
-# Load API Key and API Site ID from Configuration. Else --> set to None
+# Load SolarEdge API Key and API Site ID from Configuration. Else --> set to None
 APIKEY = getattr(settings, 'SEDGE_APIKEY', None)
 APIID = getattr(settings, 'SEDGE_SITEID', None)
+
+# Load worldweatheronline.com API Key and Configuration
+weatherAPIKEY = "cdb9121d690f43aca7a110709191801"
+weatherAPILocation = "Meilen"
+weatherAPIForecastDays = str(15)
+weatherAPIURL = "http://api.worldweatheronline.com/premium/v1/weather.ashx?key=" + weatherAPIKEY + "&q=" + weatherAPILocation + "&format=json&num_of_days=" + weatherAPIForecastDays
 
 @login_required
 def home(request):
@@ -37,6 +43,7 @@ def home(request):
     # Try to load data from API
     api_request_success = True
     try:
+        # SolarEdge API requests
         api_adr_site_details ='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/details?api_key=' + solarEdgeAPIKey
         request.session['api_res_site_details']=requests.get(api_adr_site_details).json()
         api_adr_site_overview ='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/overview?api_key=' + solarEdgeAPIKey
@@ -49,6 +56,8 @@ def home(request):
         request.session['api_res_site_energyDetails_DAY']=requests.get(api_adr_site_energyDetails_DAY).json()
         api_adr_site_energyDetails_QUART_HOUR='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energyDetails?meters=PRODUCTION,CONSUMPTION&timeUnit=QUARTER_OF_AN_HOUR&startTime=' + (datetime.now() - timedelta(350)).strftime("%Y-%m-%d") + '%2000:00:00&endTime=' + datetime.now().strftime("%Y-%m-%d") + '%2023:59:59&api_key=' + solarEdgeAPIKey
         request.session['api_res_site_energyDetails_QUART_HOUR']=requests.get(api_adr_site_energyDetails_QUART_HOUR).json()
+        # Weather API requests
+        request.session['weather_api_res']=requests.get(weatherAPIURL).json()
     except:
         api_request_success = False
         pass
@@ -145,6 +154,7 @@ def home(request):
             'api_res_site_dataPeriod': api_res_site_dataPeriod,
             'api_res_site_energy': api_res_site_energy,
             'api_res_site_energyDetails': api_res_site_energyDetails,
+            'weather_api_res_all': request.session['weather_api_res'],
         },
     }
     return render(request, 'analyzer/home.html', context)
