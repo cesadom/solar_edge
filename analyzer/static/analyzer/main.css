@@ -12,6 +12,14 @@ ul {
   margin: 0;
 }
 
+table {
+  border-collapse: collapse;
+}
+
+table, th, td {
+  border: 1px solid black;
+}
+
 .bg-steel {
   background-color: #5f788a;
 }

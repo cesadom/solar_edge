@@ -55,11 +55,35 @@
       </p>
       
       <p>
-        <b>Weather API Result plain:</b> {{  API_results.weather_api_res_all }} W
+        <b>Weather API forecast:</b>
       </p>
+      <table style="font-size: 13px">
+        <tr style="font-weight: bold">
+          <td>
+            date
+          </td>
+          <td>
+            sun hours
+          </td>
+          <td>
+            chance of sunshine at day hour
+          </td>
+        </tr>
+        {% for weather_date, weather_forecast in API_results.weather_api_res_all.items %}
+        <tr>
+          <td>
+            {{ weather_date }}
+          </td>
+          <td>
+            {{ weather_forecast.sunHour }}
+          </td>
+          <td>
+            {{ weather_forecast.chanceofsunshineAtDayHour }}
+          </td>
+        {% endfor %}
+        </tr>
+      </table>
       
-      <h2>Produktion und Verbrauch der letzten 10 Tage</h2>
-
 
 <!-- 
 EXAMPLE FROM https://stackoverflow.com/questions/44990517/displaying-json-data-in-chartjs

@@ -4,7 +4,6 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.conf import settings
 from .models import SolarSystem, SolarModule, SolarMeasurement, Item
-import simulator as simu
 import solaredge
 import requests
 import time
@@ -19,8 +18,8 @@ APIID = getattr(settings, 'SEDGE_SITEID', None)
 # Load worldweatheronline.com API Key and Configuration
 weatherAPIKEY = "cdb9121d690f43aca7a110709191801"
 weatherAPILocation = "Meilen"
-#weatherAPIForecastDays = str(15)
-weatherAPIURL = "http://api.worldweatheronline.com/premium/v1/weather.ashx?key=" + weatherAPIKEY + "&q=" + weatherAPILocation + "&format=json&num_of_days=5"
+weatherAPIForecastDays = str(7)
+weatherAPIURL = "http://api.worldweatheronline.com/premium/v1/weather.ashx?key=" + weatherAPIKEY + "&q=" + weatherAPILocation + "&format=json&num_of_days=" + weatherAPIForecastDays
 
 @login_required
 def home(request):
@@ -42,6 +41,7 @@ def home(request):
     
     # Try to load data from API
     api_request_success = True
+    request.session['weather_api_res']=None
     try:
         # SolarEdge API requests
         api_adr_site_details ='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/details?api_key=' + solarEdgeAPIKey
@@ -52,12 +52,13 @@ def home(request):
         request.session['api_res_site_dataPeriod']=requests.get(api_adr_site_dataPeriod).json()
         api_adr_site_energy='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energy?timeUnit=DAY&startDate=' + (datetime.now() - timedelta(10)).strftime("%Y-%m-%d") + '&endDate=' + datetime.now().strftime("%Y-%m-%d") + '&api_key=' + solarEdgeAPIKey
         request.session['api_res_site_energy']=requests.get(api_adr_site_energy).json()
-        api_adr_site_energyDetails_DAY='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energyDetails?meters=PRODUCTION,CONSUMPTION&timeUnit=DAY&startTime=' + (datetime.now() - timedelta(350)).strftime("%Y-%m-%d") + '%2000:00:00&endTime=' + datetime.now().strftime("%Y-%m-%d") + '%2023:59:59&api_key=' + solarEdgeAPIKey
+        api_adr_site_energyDetails_DAY='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energyDetails?meters=PRODUCTION,CONSUMPTION&timeUnit=DAY&startTime=' + (datetime.now() - timedelta(2)).strftime("%Y-%m-%d") + '%2000:00:00&endTime=' + datetime.now().strftime("%Y-%m-%d") + '%2023:59:59&api_key=' + solarEdgeAPIKey
         request.session['api_res_site_energyDetails_DAY']=requests.get(api_adr_site_energyDetails_DAY).json()
-        api_adr_site_energyDetails_QUART_HOUR='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energyDetails?meters=PRODUCTION,CONSUMPTION&timeUnit=QUARTER_OF_AN_HOUR&startTime=' + (datetime.now() - timedelta(350)).strftime("%Y-%m-%d") + '%2000:00:00&endTime=' + datetime.now().strftime("%Y-%m-%d") + '%2023:59:59&api_key=' + solarEdgeAPIKey
+        api_adr_site_energyDetails_QUART_HOUR='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energyDetails?meters=PRODUCTION,CONSUMPTION&timeUnit=QUARTER_OF_AN_HOUR&startTime=' + (datetime.now() - timedelta(2)).strftime("%Y-%m-%d") + '%2000:00:00&endTime=' + datetime.now().strftime("%Y-%m-%d") + '%2023:59:59&api_key=' + solarEdgeAPIKey
         request.session['api_res_site_energyDetails_QUART_HOUR']=requests.get(api_adr_site_energyDetails_QUART_HOUR).json()
         # Weather API requests
         request.session['weather_api_res']=requests.get(weatherAPIURL).json()
+        # print(request.session['weather_api_res'])
     except:
         api_request_success = False
         pass
@@ -139,13 +140,33 @@ def home(request):
     energyProduction = models.PositiveIntegerField(default=0)
     energyConsumtion 
     """
+    
+    # Parse Weather API result
+    weather_api_weatherForecast = request.session['weather_api_res']['data']['weather']
+    weather_api_forecastedSunHours = dict()
+    for forecastedDate in weather_api_weatherForecast:
+        # print(forecastedDate['date'])
+        # print(forecastedDate['sunHour'])
+        value=forecastedDate['date']
+        weather_api_forecastedSunHours[value]={'sunHour': forecastedDate['sunHour']}
+        weather_api_forecastedSunHours[value]['chanceofsunshineAtDayHour'] = {}
+        for forecastedHours in forecastedDate['hourly']:
+            forecastedHoursTime_str=str(forecastedHours['time'])
+            # print(forecastedHoursTime_str)
+            forecastedHoursChanceofsunshine_str=str(forecastedHours['chanceofsunshine'])
+            # print(forecastedHoursChanceofsunshine_str)
+            weather_api_forecastedSunHours[value]['chanceofsunshineAtDayHour'][forecastedHoursTime_str] = forecastedHoursChanceofsunshine_str
+    
+    print(weather_api_forecastedSunHours)
+
+    # print(weather_api_forecastedSunHours)
 
     api_res_site_details = request.session['api_res_site_details']
     api_res_site_overview = request.session['api_res_site_overview']
     api_res_site_dataPeriod = request.session['api_res_site_dataPeriod']
     api_res_site_energy = request.session['api_res_site_energy']
     api_res_site_energyDetails = request.session['api_res_site_energyDetails_DAY']
-
+    
     context = {
         'title': 'Home',
         'API_results': {
@@ -154,7 +175,7 @@ def home(request):
             'api_res_site_dataPeriod': api_res_site_dataPeriod,
             'api_res_site_energy': api_res_site_energy,
             'api_res_site_energyDetails': api_res_site_energyDetails,
-            'weather_api_res_all': request.session['weather_api_res'],
+            'weather_api_res_all': weather_api_forecastedSunHours,
         },
     }
     return render(request, 'analyzer/home.html', context)
