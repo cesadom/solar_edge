@@ -29,11 +29,3 @@ class SolarMeasurement(models.Model):
     
     def __str__(self):
         return str(self.time) + " - energy production: " + str(self.energyProduction) + " " + self.unit + " per " + self.timeUnit + ", energy consumtion: " + str(self.energyConsumtion) + " " + self.unit + " per " + self.timeUnit
-
-class Item(models.Model):
-    name = models.CharField(max_length=30)
-    description = models.TextField()
-    wattHours = models.PositiveIntegerField(default=None, blank=True, null=True)
-    
-    def __str__(self):
-        return self.name + " - " + self.description + ", " + str(self.wattHours) + "wh"

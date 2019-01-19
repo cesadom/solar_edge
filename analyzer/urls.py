@@ -9,4 +9,6 @@ urlpatterns = [
     path('api_plain/', views.api_plain, name='analyzer-api_plain'),
     path('about/', views.about, name='analyzer-about'),
     path('cron/', views.cron, name='analyzer-cron'),
+    path('luftibus_on/', views.luftibus_on, name='luftibus-on'),
+    path('luftibus_off/', views.luftibus_off, name='luftibus-off'),
 ]

@@ -32,7 +32,8 @@ ALLOWED_HOSTS = ['luftibus.herokuapp.com']
 INSTALLED_APPS = [
     'analyzer.apps.AnalyzerConfig',
     'users.apps.UsersConfig',
-    'simulator.apps.SimulatorConfig',
+    'weatherforecast.apps.WeatherforecastConfig',
+    'smartdevice.apps.SmartdeviceConfig',
     'crispy_forms',
     'django.contrib.admin',
     'django.contrib.auth',

@@ -3,7 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.conf import settings
-from .models import SolarSystem, SolarModule, SolarMeasurement, Item
+from .models import SolarSystem, SolarModule, SolarMeasurement
 import solaredge
 import requests
 import time
@@ -356,3 +356,13 @@ def about(request):
 def cron(request):
     # simu.sunnydays(datetime.now, datetime.now() + timedelta(10))
     return HttpResponse('all done!')
+
+def luftibus_on(request):
+    event="luftibus_on"
+    requests.post("https://maker.ifttt.com/trigger/"+event+"/with/key/guXHOYmQVhhA06ScMESPWht0tyY1SjKRAexZpdJcUVY")
+    return HttpResponse('luftibus eingeschaltet!')
+
+def luftibus_off(request):
+    event="luftibus_off"
+    requests.post("https://maker.ifttt.com/trigger/"+event+"/with/key/guXHOYmQVhhA06ScMESPWht0tyY1SjKRAexZpdJcUVY")
+    return HttpResponse('luftibus ausgeschaltet!')
