@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.conf import settings
 from .models import SolarSystem, SolarModule, SolarMeasurement
+from weatherforecast.models import WeatherForecast, WeatherForecastDayHour
 import solaredge
 import requests
 import time
@@ -145,7 +146,13 @@ def home(request):
     weather_api_weatherForecast = request.session['weather_api_res']['data']['weather']
     weather_api_forecastedSunHours = dict()
     for forecastedDate in weather_api_weatherForecast:
+        # sMeasurement, created = SolarMeasurement.objects.get_or_create(time=dateutil.parser.parse(consumptionValue['date']), defaults={'timeUnit': solarEnergyDetails['timeUnit'], 'unit': solarEnergyDetails['unit'], 'energyConsumtion': consumptionValue['value']})
+        # sMeasurement.save()
+        # sMeasurement = SolarMeasurement.objects.filter(time=dateutil.parser.parse(productionValue['date']))
+        # sMeasurement.update(energyProduction = productionValue['value'])
         # print(forecastedDate['date'])
+        weatherForecast, created = WeatherForecast.objects.get_or_create(forecastDate=datetime.today().strftime('%Y-%m-%d'), defaults={'date': forecastedDate['date'], 'sunHours': forecastedDate['sunHour']})
+        weatherForecast.save()
         # print(forecastedDate['sunHour'])
         value=forecastedDate['date']
         weather_api_forecastedSunHours[value]={'sunHour': forecastedDate['sunHour']}
