@@ -150,9 +150,9 @@ def home(request):
         # sMeasurement.save()
         # sMeasurement = SolarMeasurement.objects.filter(time=dateutil.parser.parse(productionValue['date']))
         # sMeasurement.update(energyProduction = productionValue['value'])
-        # print(forecastedDate['date'])
-        weatherForecast, created = WeatherForecast.objects.get_or_create(forecastDate=datetime.today().strftime('%Y-%m-%d'), defaults={'date': forecastedDate['date'], 'sunHours': forecastedDate['sunHour']})
-        weatherForecast.save()
+        print(forecastedDate['date'])
+        weatherForecast_obj, created = WeatherForecast.objects.get_or_create(forecastDate=datetime.today().strftime('%Y-%m-%d'), date=forecastedDate['date'], defaults={'sunHours': forecastedDate['sunHour']})
+        weatherForecast_obj.save()
         # print(forecastedDate['sunHour'])
         value=forecastedDate['date']
         weather_api_forecastedSunHours[value]={'sunHour': forecastedDate['sunHour']}
@@ -163,6 +163,8 @@ def home(request):
             forecastedHoursChanceofsunshine_str=str(forecastedHours['chanceofsunshine'])
             # print(forecastedHoursChanceofsunshine_str)
             weather_api_forecastedSunHours[value]['chanceofsunshineAtDayHour'][forecastedHoursTime_str] = forecastedHoursChanceofsunshine_str
+            weatherForecastDayHour_obj, created = WeatherForecastDayHour.objects.get_or_create(time=forecastedHours['time'], weatherForecast=weatherForecast_obj, chanceofsunshine=forecastedHours['chanceofsunshine'])
+        
     
     print(weather_api_forecastedSunHours)
 
@@ -269,7 +271,8 @@ def api_plain(request):
     except:
         pass
     
-    if (not is_cached) or (cashed_since >= 20) or request.session['api_res_site_overview'] == None:
+    # if (not is_cached) or (cashed_since >= 20) or request.session['api_res_site_overview'] == None:
+    if True:
         request.session['cache_ts'] = time.time()
         request.session['api_res_site_list'] = None
         request.session['api_res_site_details'] = None

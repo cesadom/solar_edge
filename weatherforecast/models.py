@@ -9,7 +9,7 @@ class WeatherForecast(models.Model):
     manualForecastRate = models.PositiveIntegerField(default=None, blank=True, null=True)
     
     def __str__(self):
-        return self.date + " - sun hours: " + self.sunHours + "h, forecasted at " + str(self.forecastDate)
+        return self.date + " - sun hours: " + str(self.sunHours) + "h, forecasted at " + str(self.forecastDate)
 
 class WeatherForecastDayHour(models.Model):
     time = models.PositiveIntegerField(default=None, blank=True, null=True)
@@ -19,7 +19,7 @@ class WeatherForecastDayHour(models.Model):
     manualForecastRate = models.PositiveIntegerField(default=None, blank=True, null=True)
     
     def __str__(self):
-        return self.time + " - " + self.description + ", " + str(self.wattHours) + "wh"
+        return self.weatherForecast.date + " - " + str(self.time) + ": " + str(self.chanceofsunshine) + "%"
 
 class WeatherActualMeasurement(models.Model):
     date = models.CharField(max_length=10)
