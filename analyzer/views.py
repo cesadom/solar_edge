@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.conf import settings
 from .models import SolarSystem, SolarModule, SolarMeasurement
 from weatherforecast.models import WeatherForecast, WeatherForecastDayHour
+from smartdevice import createSmartDevice, createSmartDevice_view
 import solaredge
 import requests
 import time
@@ -165,11 +166,40 @@ def home(request):
             weather_api_forecastedSunHours[value]['chanceofsunshineAtDayHour'][forecastedHoursTime_str] = forecastedHoursChanceofsunshine_str
             weatherForecastDayHour_obj, created = WeatherForecastDayHour.objects.get_or_create(time=forecastedHours['time'], weatherForecast=weatherForecast_obj, chanceofsunshine=forecastedHours['chanceofsunshine'])
         
-    
     print(weather_api_forecastedSunHours)
-
     # print(weather_api_forecastedSunHours)
-
+    
+    # Create SmartDevice
+    smartDevice1 = {
+        'name': 'Luftentfeuchter',
+        'description ': 'entzieht Feuchtigkeit aus der Luft. Verfügt über Hydrostat Sensor.',
+        'smartFunctions': [],
+    }
+    
+    smartDevice2 = {
+        'name': 'smart Steckdose D-Link',
+        'description ': 'Smart Steckdose für Luftibus',
+        'smartFunctions': [
+            {
+                'name': 'ferngesteuerte Ein- und Ausschaltfunktion',
+                'description': 'Der Stromfluss kann ferngesteuert ein oder ausgeschaltet werden',
+            },
+            {
+                'name': 'Stromflussmessung',
+                'description': 'Der Stromfluss wird gemessen und kann abgefragt werden',
+            }
+        ],
+    }
+    
+    smartDevice1_obj = createSmartDevice(smartDevice1)
+    print("smartDevice1_obj")
+    print(smartDevice1_obj)
+    smartDevice2_obj = createSmartDevice(smartDevice2)
+    print("smartDevice2_obj")
+    print(smartDevice2_obj)
+    
+    
+    # load data into context
     api_res_site_details = request.session['api_res_site_details']
     api_res_site_overview = request.session['api_res_site_overview']
     api_res_site_dataPeriod = request.session['api_res_site_dataPeriod']
@@ -185,6 +215,8 @@ def home(request):
             'api_res_site_energy': api_res_site_energy,
             'api_res_site_energyDetails': api_res_site_energyDetails,
             'weather_api_res_all': weather_api_forecastedSunHours,
+            'smartDevice1_obj': smartDevice1_obj,
+            'smartDevice2_obj': smartDevice2_obj
         },
     }
     return render(request, 'analyzer/home.html', context)
