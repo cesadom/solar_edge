@@ -12,10 +12,10 @@ def createSmartDevice_view(request):
 
 # Create new SmartDevice object and return it, return existing object if SmartDevice already exists. 
 def createSmartDevice(smartDeviceData):
-  smartDevice, smartDeviceCreated = smartDevice.objects.get_or_create(name=smartDeviceData['name'], defaults={'description': smartDeviceData['description ']})
+  smartDevice, smartDeviceCreated = smartDevice.objects.get_or_create(name=smartDeviceData['name'], defaults={'description': smartDeviceData['description']})
   smartDevice.save()
   for smartF in smartDeviceData['smartFunctions']:
-     smartF_obj = smartFunction.objects.get_or_create(name=smartF['name'], defaults={'description': smartF['description']})
+     smartF_obj, smartDeviceFunctionCreated = smartFunction.objects.get_or_create(name=smartF['name'], defaults={'description': smartF['description']})
      smartDevice.smartFunction.add(smartF_obj)
   print(smartDeviceCreated)
   return smartDevice
