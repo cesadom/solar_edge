@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.conf import settings
 from .models import SolarSystem, SolarModule, SolarMeasurement
 from weatherforecast.models import WeatherForecast, WeatherForecastDayHour
-from smartdevice import createSmartDevice, createSmartDevice_view
+import smartdevice
 import solaredge
 import requests
 import time
@@ -191,12 +191,12 @@ def home(request):
         ],
     }
     
-    smartDevice1_obj = createSmartDevice(smartDevice1)
-    print("smartDevice1_obj")
-    print(smartDevice1_obj)
-    smartDevice2_obj = createSmartDevice(smartDevice2)
-    print("smartDevice2_obj")
-    print(smartDevice2_obj)
+    # smartDevice1_obj = createSmartDevice(smartDevice1)
+    # print("smartDevice1_obj")
+    # print(smartDevice1_obj)
+    # smartDevice2_obj = createSmartDevice(smartDevice2)
+    # print("smartDevice2_obj")
+    # print(smartDevice2_obj)
     
     
     # load data into context
@@ -215,8 +215,8 @@ def home(request):
             'api_res_site_energy': api_res_site_energy,
             'api_res_site_energyDetails': api_res_site_energyDetails,
             'weather_api_res_all': weather_api_forecastedSunHours,
-            'smartDevice1_obj': smartDevice1_obj,
-            'smartDevice2_obj': smartDevice2_obj
+            # 'smartDevice1_obj': smartDevice1_obj,
+            # 'smartDevice2_obj': smartDevice2_obj
         },
     }
     return render(request, 'analyzer/home.html', context)
