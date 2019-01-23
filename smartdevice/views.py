@@ -15,7 +15,7 @@ def createSmartDevice(smartDeviceData):
   smartDevice, smartDeviceCreated = smartDevice.objects.get_or_create(name=smartDeviceData['name'], defaults={'description': smartDeviceData['description ']})
   smartDevice.save()
   for smartF in smartDeviceData['smartFunctions']:
-     smartF_obj = smartFunction.objects.get_or_create(name=smartF['name'], defaults={'description': name=smartF['description']})
+     smartF_obj = smartFunction.objects.get_or_create(name=smartF['name'], defaults={'description': smartF['description']})
      smartDevice.smartFunction.add(smartF_obj)
   print(smartDeviceCreated)
   return smartDevice
