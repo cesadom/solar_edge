@@ -5,7 +5,8 @@ from django.utils import timezone
 from django.conf import settings
 from .models import SolarSystem, SolarModule, SolarMeasurement
 from weatherforecast.models import WeatherForecast, WeatherForecastDayHour
-import smartdevice
+from weatherforecast.views import sunnydays
+from smartdevice.views import createSmartDevice, luftibus_on, luftibus_off
 import solaredge
 import requests
 import time
@@ -181,12 +182,28 @@ def home(request):
         'description ': 'Smart Steckdose für Luftibus',
         'smartFunctions': [
             {
+                'code': 'f10100',
                 'name': 'ferngesteuerte Ein- und Ausschaltfunktion',
                 'description': 'Der Stromfluss kann ferngesteuert ein oder ausgeschaltet werden',
+                'config': [
+                    {
+                        'code': 'c10100',
+                        'description': 'dafault state',
+                        'value': 'OFF',
+                    }
+                ]
             },
             {
+                'code': 'f10200',
                 'name': 'Stromflussmessung',
                 'description': 'Der Stromfluss wird gemessen und kann abgefragt werden',
+                'config': [
+                    {
+                        'code': 'c20100',
+                        'description': 'interval for energy measurements in seconds',
+                        'value': '30',
+                    }
+                ]
             }
         ],
     }
@@ -394,17 +411,11 @@ def api_plain(request):
 def about(request):
     return render(request, 'analyzer/about.html', {'title': 'About'})
 
-@login_required
 def cron(request):
-    # simu.sunnydays(datetime.now, datetime.now() + timedelta(10))
+    mostsunnydays = sunnydays(datetime.now, datetime.now() + timedelta(10))
+    print(mostsunnydays)
+    if int(time.time())%2 == 1:
+        luftibus_on()
+    else:
+        luftibus_off()
     return HttpResponse('all done!')
-
-def luftibus_on(request):
-    event="luftibus_on"
-    requests.post("https://maker.ifttt.com/trigger/"+event+"/with/key/guXHOYmQVhhA06ScMESPWht0tyY1SjKRAexZpdJcUVY")
-    return HttpResponse('luftibus eingeschaltet!')
-
-def luftibus_off(request):
-    event="luftibus_off"
-    requests.post("https://maker.ifttt.com/trigger/"+event+"/with/key/guXHOYmQVhhA06ScMESPWht0tyY1SjKRAexZpdJcUVY")
-    return HttpResponse('luftibus ausgeschaltet!')

@@ -1,0 +1,175 @@
+{% extends "analyzer/base.html" %}
+
+<script>
+{% block js %}
+  var endpoint = '/api/data/'
+  var defaultData = []
+  var labels = [];
+  $.ajax({
+      method: "GET",
+      url: endpoint,
+      success: function(data){
+          // var res_energyTimeUnit = data.energyDetails.timeUnit
+          var res_energyType = data.energyDetails.meters.map(function(e) {
+             return e.type;
+          });
+          var res_energyType = data.energyDetails.meters.map(function(e) {
+             return e.values;
+          });
+          setChart()
+      },
+      error: function(error_data){
+          console.log("error")
+          console.log(error_data)
+      }
+  })
+
+{% endblock %}
+</script>
+
+{% block content %}
+  <article class="media content-section">
+    <div class="media-body" url-endpoint='{% url "api-data" %}'>
+      <div class="article-metadata">
+        <small class="text-muted"><b>SolarEdge Installation:</b> {{  API_results.api_res_site_details.details.name }}, <b>installation date:</b> {{  API_results.api_res_site_details.details.installationDate }}</small>
+      </div>
+      
+      <h2>Übersicht</h2>
+      <p>
+        <b>zuletzt aktualisiert am:</b> {{  API_results.api_res_site_overview.overview.lastUpdateTime }}
+      </p>
+      <p>
+        <b>Energie gesamt:</b> {{  API_results.api_res_site_overview.overview.lifeTimeData.energy }} Wh
+      </p>
+      <p>
+        <b>Energie in diesem Jahr:</b> {{  API_results.api_res_site_overview.overview.lastYearData.energy }} Wh
+      </p>
+      <p>
+        <b>Energie in diesem Monat:</b> {{  API_results.api_res_site_overview.overview.lastMonthData.energy }} Wh
+      </p>
+      <p>
+        <b>Energie heute:</b> {{  API_results.api_res_site_overview.overview.lastDayData.energy }} Wh
+      </p>
+      <p>
+        <b>Aktuelle Leistung:</b> {{  API_results.api_res_site_overview.overview.currentPower.power }} W
+      </p>
+      
+      <p>
+        <b>Weather API forecast:</b>
+      </p>
+      <table style="font-size: 13px">
+        <tr style="font-weight: bold">
+          <td>
+            date
+          </td>
+          <td>
+            sun hours
+          </td>
+          <td>
+            chance of sunshine at day hour
+          </td>
+        </tr>
+        {% for weather_date, weather_forecast in API_results.weather_api_res_all.items %}
+        <tr>
+          <td>
+            {{ weather_date }}
+          </td>
+          <td>
+            {{ weather_forecast.sunHour }}
+          </td>
+          <td>
+            {{ weather_forecast.chanceofsunshineAtDayHour }}
+          </td>
+        {% endfor %}
+        </tr>
+      </table>
+      
+
+<!-- 
+EXAMPLE FROM https://stackoverflow.com/questions/44990517/displaying-json-data-in-chartjs
+var jsonfile = {
+   "jsonarray": [{
+      "name": "Joe",
+      "age": 12
+   }, {
+      "name": "Tom",
+      "age": 14
+   }]
+};
+
+var labels = jsonfile.jsonarray.map(function(e) {
+   return e.name;
+});
+var data = jsonfile.jsonarray.map(function(e) {
+   return e.age;
+});;
+
+var ctx = canvas.getContext('2d');
+var config = {
+   type: 'line',
+   data: {
+      labels: labels,
+      datasets: [{
+         label: 'Graph Line',
+         data: data,
+         backgroundColor: 'rgba(0, 119, 204, 0.3)'
+      }]
+   }
+};
+
+var chart = new Chart(ctx, config);
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
+<canvas id="canvas"></canvas>
+
+
+      {% for API_result_key, API_result_value in API_results.items %}
+        <p class="article-content"><strong> {{  API_result_key }} </strong></p>
+        <p class="article-content"> {{  API_result_value }} </p>
+      {% endfor %}
+ -->
+
+      <canvas id="myChart" width="400" height="400"></canvas>
+      <script>
+        function setChart(){
+          var ctx = document.getElementById("myChart");
+          var myChart = new Chart(ctx, {
+              type: 'bar',
+              data: {
+                  labels: ["Waschmaschine", "Trockner", "Licht", "Herdplatte", "Spülmaschine", "Kaffeemaschine"],
+                  datasets: [{
+                      label: 'kW',
+                      data: [12, 19, 3, 5, 2, 3],
+                      backgroundColor: [
+                          'rgba(255, 99, 132, 0.2)',
+                          'rgba(54, 162, 235, 0.2)',
+                          'rgba(255, 206, 86, 0.2)',
+                          'rgba(75, 192, 192, 0.2)',
+                          'rgba(153, 102, 255, 0.2)',
+                          'rgba(255, 159, 64, 0.2)'
+                      ],
+                      borderColor: [
+                          'rgba(255,99,132,1)',
+                          'rgba(54, 162, 235, 1)',
+                          'rgba(255, 206, 86, 1)',
+                          'rgba(75, 192, 192, 1)',
+                          'rgba(153, 102, 255, 1)',
+                          'rgba(255, 159, 64, 1)'
+                      ],
+                      borderWidth: 1
+                  }]
+              },
+              options: {
+                  scales: {
+                      yAxes: [{
+                          ticks: {
+                              beginAtZero:true
+                          }
+                      }]
+                  }
+              }
+          });
+        }
+      </script>
+    </div>
+  </article>
+{% endblock content %}
