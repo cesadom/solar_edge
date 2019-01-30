@@ -22,12 +22,15 @@ def createSmartDevice(smartDeviceData):
   print(smartDeviceCreated)
   return smartDevice
 
+# switches luftibus on via IFTTT trigger
+# TODO: save status and history in model and check before switching on
 def luftibus_on():
     event="luftibus_on"
     requests.post("https://maker.ifttt.com/trigger/"+event+"/with/key/guXHOYmQVhhA06ScMESPWht0tyY1SjKRAexZpdJcUVY")
     print('luftibus eingeschaltet!')
     return True
 
+# switches luftibus off via IFTTT trigger
 def luftibus_off():
     event="luftibus_off"
     requests.post("https://maker.ifttt.com/trigger/"+event+"/with/key/guXHOYmQVhhA06ScMESPWht0tyY1SjKRAexZpdJcUVY")

@@ -24,6 +24,34 @@ weatherAPILocation = "Meilen"
 weatherAPIForecastDays = str(7)
 weatherAPIURL = "http://api.worldweatheronline.com/premium/v1/weather.ashx?key=" + weatherAPIKEY + "&q=" + weatherAPILocation + "&format=json&num_of_days=" + weatherAPIForecastDays
 
+# returns Solar Edge Overview
+def getSolEdgeOverview():
+    try:
+        api_adr_site_overview = 'https://monitoringapi.solaredge.com/site/' + APIID + '/overview?api_key=' + APIKEY
+        api_res_site_overview = requests.get(api_adr_site_overview).json()
+    except:
+        print('ERROR in API request!')
+        pass
+    
+    return api_res_site_overview
+
+# returns Solar Edge current Power Flow
+def getSolEdgeCurrentPowerFlow():
+    try:
+        api_adr_site_currentPowerFlow='https://monitoringapi.solaredge.com/site/' + APIID + '/currentPowerFlow?api_key=' + APIKEY
+        api_res_site_currentPowerFlow=requests.get(api_adr_site_currentPowerFlow).json()
+    except:
+        print('ERROR in API request!')
+        pass
+    return api_res_site_currentPowerFlow
+
+# returns Solar Edge Overcapacity, may also be negative due to supply from grid
+def getSolEdgeCurrentOvercapacity():
+    currentPowerFlow = getSolEdgeCurrentPowerFlow()
+    print(currentPowerFlow)
+    return float(currentPowerFlow['siteCurrentPowerFlow']['PV']['currentPower']) - float(currentPowerFlow['siteCurrentPowerFlow']['LOAD']['currentPower'])
+
+
 @login_required
 def home(request):
     
@@ -57,8 +85,6 @@ def home(request):
         request.session['api_res_site_energy']=requests.get(api_adr_site_energy).json()
         api_adr_site_energyDetails_DAY='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energyDetails?meters=PRODUCTION,CONSUMPTION&timeUnit=DAY&startTime=' + (datetime.now() - timedelta(2)).strftime("%Y-%m-%d") + '%2000:00:00&endTime=' + datetime.now().strftime("%Y-%m-%d") + '%2023:59:59&api_key=' + solarEdgeAPIKey
         request.session['api_res_site_energyDetails_DAY']=requests.get(api_adr_site_energyDetails_DAY).json()
-        api_adr_site_energyDetails_QUART_HOUR='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energyDetails?meters=PRODUCTION,CONSUMPTION&timeUnit=QUARTER_OF_AN_HOUR&startTime=' + (datetime.now() - timedelta(2)).strftime("%Y-%m-%d") + '%2000:00:00&endTime=' + datetime.now().strftime("%Y-%m-%d") + '%2023:59:59&api_key=' + solarEdgeAPIKey
-        request.session['api_res_site_energyDetails_QUART_HOUR']=requests.get(api_adr_site_energyDetails_QUART_HOUR).json()
         # Weather API requests
         request.session['weather_api_res']=requests.get(weatherAPIURL).json()
         # print(request.session['weather_api_res'])
@@ -222,7 +248,7 @@ def home(request):
     api_res_site_dataPeriod = request.session['api_res_site_dataPeriod']
     api_res_site_energy = request.session['api_res_site_energy']
     api_res_site_energyDetails = request.session['api_res_site_energyDetails_DAY']
-    
+
     context = {
         'title': 'Home',
         'API_results': {
@@ -350,6 +376,8 @@ def api_plain(request):
             request.session['api_res_site_energy']=requests.get(api_adr_site_energy).json()
             api_adr_site_energyDetails='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energyDetails?meters=PRODUCTION,CONSUMPTION&timeUnit=DAY&startTime=2018-12-01%2000:00:00&endTime=2018-12-07%2023:59:59&api_key=' + solarEdgeAPIKey
             request.session['api_res_site_energyDetails']=requests.get(api_adr_site_energyDetails).json()
+            api_adr_site_energyDetails_QUART_HOUR='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/energyDetails?meters=PRODUCTION,CONSUMPTION&timeUnit=QUARTER_OF_AN_HOUR&startTime=' + (datetime.now() - timedelta(2)).strftime("%Y-%m-%d") + '%2000:00:00&endTime=' + datetime.now().strftime("%Y-%m-%d") + '%2023:59:59&api_key=' + solarEdgeAPIKey
+            request.session['api_res_site_energyDetails_QUART_HOUR']=requests.get(api_adr_site_energyDetails_QUART_HOUR).json()
             api_adr_site_timeFrameEnergy='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/timeFrameEnergy?timeUnit=DAY&endDate=2018-12-31&startDate=2018-12-01&api_key=' + solarEdgeAPIKey
             request.session['api_res_site_timeFrameEnergy']=requests.get(api_adr_site_timeFrameEnergy).json()
             api_adr_site_power='https://monitoringapi.solaredge.com/site/' + solarEdgeID + '/power?startTime=2018-12-07%2007:00:00&endTime=2018-12-07%2019:00:00&api_key=' + solarEdgeAPIKey
@@ -373,6 +401,7 @@ def api_plain(request):
     api_res_site_dataPeriod = request.session['api_res_site_dataPeriod']
     api_res_site_energy = request.session['api_res_site_energy']
     api_res_site_energyDetails = request.session['api_res_site_energyDetails']
+    api_res_site_energyDetails_QUART_HOUR = request.session['api_res_site_energyDetails_QUART_HOUR']
     api_res_site_timeFrameEnergy = request.session['api_res_site_timeFrameEnergy']
     api_res_site_power = request.session['api_res_site_power']
     api_res_site_powerDetails = request.session['api_res_site_powerDetails']
@@ -395,6 +424,7 @@ def api_plain(request):
             'api_res_site_dataPeriod': api_res_site_dataPeriod,
             'api_res_site_energy': api_res_site_energy,
             'api_res_site_energyDetails': api_res_site_energyDetails,
+            'api_res_site_energyDetails_QUART_HOUR': api_res_site_energyDetails_QUART_HOUR,
             'api_res_site_timeFrameEnergy': api_res_site_timeFrameEnergy,
             'api_res_site_power': api_res_site_power,
             'api_res_site_powerDetails': api_res_site_powerDetails,
@@ -413,9 +443,15 @@ def about(request):
 
 def cron(request):
     mostsunnydays = sunnydays(datetime.now, datetime.now() + timedelta(10))
-    print(mostsunnydays)
-    if int(time.time())%2 == 1:
+    
+    print(getSolEdgeCurrentOvercapacity())
+
+    currentOvercapacity = getSolEdgeCurrentOvercapacity()
+
+    if currentOvercapacity > 0:
         luftibus_on()
+        luftibus_status = 'on'
     else:
         luftibus_off()
-    return HttpResponse('all done!')
+        luftibus_status = 'off'
+    return HttpResponse('all done! luftibus: ' + luftibus_status)
