@@ -37,6 +37,7 @@ def getSolEdgeOverview():
 
 # returns Solar Edge current Power Flow
 def getSolEdgeCurrentPowerFlow():
+    api_res_site_currentPowerFlow = None
     try:
         api_adr_site_currentPowerFlow='https://monitoringapi.solaredge.com/site/' + APIID + '/currentPowerFlow?api_key=' + APIKEY
         api_res_site_currentPowerFlow=requests.get(api_adr_site_currentPowerFlow).json()
@@ -49,7 +50,10 @@ def getSolEdgeCurrentPowerFlow():
 def getSolEdgeCurrentOvercapacity():
     currentPowerFlow = getSolEdgeCurrentPowerFlow()
     print(currentPowerFlow)
-    return float(currentPowerFlow['siteCurrentPowerFlow']['PV']['currentPower']) - float(currentPowerFlow['siteCurrentPowerFlow']['LOAD']['currentPower'])
+    if not currentPowerFlow:
+        return -1
+    else:
+        return float(currentPowerFlow['siteCurrentPowerFlow']['PV']['currentPower']) - float(currentPowerFlow['siteCurrentPowerFlow']['LOAD']['currentPower'])
 
 
 @login_required
@@ -449,9 +453,7 @@ def cron(request):
     currentOvercapacity = getSolEdgeCurrentOvercapacity()
 
     if currentOvercapacity > 0:
-        luftibus_on()
-        luftibus_status = 'on'
+        luftibus_status = luftibus_on()
     else:
-        luftibus_off()
-        luftibus_status = 'off'
+        luftibus_status = luftibus_off()
     return HttpResponse('all done! luftibus: ' + luftibus_status)
