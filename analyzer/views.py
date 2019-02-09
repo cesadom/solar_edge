@@ -452,8 +452,10 @@ def cron(request):
     currentOvercapacity = getSolEdgeCurrentOvercapacity()
     luftibus_status = "not executed!"
 
-    # if currentOvercapacity > 0:
+    if currentOvercapacity > 0:
+        luftibus_status = "ON, but not executed!"
     #     luftibus_status = luftibus_on()
-    # else:
+    else:
+        luftibus_status = "OFF, but not executed!"
     #     luftibus_status = luftibus_off()
     return HttpResponse('all done! luftibus: ' + luftibus_status)
