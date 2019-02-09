@@ -448,11 +448,12 @@ def about(request):
 def cron(request):
     # mostsunnydays = sunnydays(datetime.now, datetime.now() + timedelta(10))
     # print(getSolEdgeCurrentOvercapacity())
-    
-    currentOvercapacity = getSolEdgeCurrentOvercapacity()
 
-    if currentOvercapacity > 0:
-        luftibus_status = luftibus_on()
-    else:
-        luftibus_status = luftibus_off()
+    currentOvercapacity = getSolEdgeCurrentOvercapacity()
+    luftibus_status = "not executed!"
+
+    # if currentOvercapacity > 0:
+    #     luftibus_status = luftibus_on()
+    # else:
+    #     luftibus_status = luftibus_off()
     return HttpResponse('all done! luftibus: ' + luftibus_status)
