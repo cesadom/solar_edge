@@ -84,4 +84,4 @@ def luftibus_off():
       event="luftibus_on"
       requests.post("https://maker.ifttt.com/trigger/"+event+"/with/key/guXHOYmQVhhA06ScMESPWht0tyY1SjKRAexZpdJcUVY")
       print('luftibus bleibt noch angeschaltet!')
-      return "trotzdem on, da luftibus erst seit " + timeDiff + " sec läuft!"
+      return "trotzdem on, da luftibus erst seit " + str(timeDiff) + " sec läuft!"
