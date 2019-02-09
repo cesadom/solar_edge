@@ -28,16 +28,24 @@ def createSmartDevice(smartDeviceData):
 def luftibus_on():
     code = "d90100"
     # get object with code
-    luftibus_obj = SmartDevice.objects.filter(code=code)
+    luftibus_obj = SmartDevice.objects.get(code=code)
     print("LUFTIBUS: " + str(luftibus_obj))
-
-    luftibusConfig_obj = SmartFunctionUnstructuredData.objects.filter(smartDevice=luftibus_obj)
+    luftibusConfig_obj = SmartFunctionUnstructuredData.objects.filter(smartDevice_id=luftibus_obj.id)
     print("LUFTIBUS Config: " + str(luftibusConfig_obj))
+    luftibusLastON = luftibusConfig_obj.get(smartDeviceDataKey='last_ON')
+    luftibusLastOFF = luftibusConfig_obj.get(smartDeviceDataKey='last_OFF')
+    luftibusTimeON = luftibusConfig_obj.get(smartDeviceDataKey='time_ON')
+    luftibusTotTimeON = luftibusConfig_obj.get(smartDeviceDataKey='totTime_ON')
+    luftibusTotTimeONDate = luftibusConfig_obj.get(smartDeviceDataKey='totTime_ON_Date')
 
-    
+    luftibusLastON.smartDeviceDataValue = datetime.now()
+    luftibusTimeON.smartDeviceDataValue = 3
+    luftibusLastON.save()
+    luftibusTimeON.save()
 
     # luftibus_obj, created = SmartDevice.objects.get_or_create(code=code, defaults={'name': name, ...})
     # TODO: evaluate if ON is possible based on Data
+    # TODO: finalize check to switch on or not based on Confic tot
     event="luftibus_on"
     requests.post("https://maker.ifttt.com/trigger/"+event+"/with/key/guXHOYmQVhhA06ScMESPWht0tyY1SjKRAexZpdJcUVY")
     print('luftibus eingeschaltet!')
@@ -46,25 +54,31 @@ def luftibus_on():
 # switches luftibus off via IFTTT trigger
 def luftibus_off():
     code = "d90100"
-
     luftibus_obj = SmartDevice.objects.get(code=code)
     print("LUFTIBUS: " + str(luftibus_obj))
-
     luftibusConfig_obj = SmartFunctionUnstructuredData.objects.filter(smartDevice_id=luftibus_obj.id)
-    # print("LUFTIBUS Config: " + str(luftibusConfig_obj))
+    print("LUFTIBUS Config: " + str(luftibusConfig_obj))
     luftibusLastON = luftibusConfig_obj.get(smartDeviceDataKey='last_ON')
     luftibusLastOFF = luftibusConfig_obj.get(smartDeviceDataKey='last_OFF')
     luftibusTimeON = luftibusConfig_obj.get(smartDeviceDataKey='time_ON')
+    luftibusTotTimeON = luftibusConfig_obj.get(smartDeviceDataKey='totTime_ON')
     
-    luftibusLastON.smartDeviceDataValue = datetime.now()
-    luftibusLastOFF.smartDeviceDataValue = datetime.now()
-    luftibusTimeON.smartDeviceDataValue = 3
-    luftibusLastON.save()
-    luftibusLastOFF.save()
+    
+    timeDiff = datetime.now() - datetime.strptime(luftibusLastON.smartDeviceDataValue, "%Y-%m-%d %H:%M:%S.%f")
+    timeDiff = round(timeDiff.total_seconds())
+    print("time delta")
+    print(timeDiff)
+
+    luftibusTimeON.smartDeviceDataValue = timeDiff
     luftibusTimeON.save()
     
-
-    event="luftibus_off"
-    requests.post("https://maker.ifttt.com/trigger/"+event+"/with/key/guXHOYmQVhhA06ScMESPWht0tyY1SjKRAexZpdJcUVY")
-    print('luftibus ausgeschaltet!')
-    return "off"
+    # TODO: finalize check to switch off or not
+    if timeDiff > (60*15):
+      event="luftibus_off"
+      requests.post("https://maker.ifttt.com/trigger/"+event+"/with/key/guXHOYmQVhhA06ScMESPWht0tyY1SjKRAexZpdJcUVY")
+      print('luftibus ausgeschaltet!')
+      luftibusLastOFF.smartDeviceDataValue = datetime.now()
+      luftibusLastOFF.save()
+      return "off"
+    else:
+      print('luftibus bleibt noch angeschaltet!')
