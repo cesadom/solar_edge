@@ -446,10 +446,9 @@ def about(request):
     return render(request, 'analyzer/about.html', {'title': 'About'})
 
 def cron(request):
-    mostsunnydays = sunnydays(datetime.now, datetime.now() + timedelta(10))
+    # mostsunnydays = sunnydays(datetime.now, datetime.now() + timedelta(10))
+    # print(getSolEdgeCurrentOvercapacity())
     
-    print(getSolEdgeCurrentOvercapacity())
-
     currentOvercapacity = getSolEdgeCurrentOvercapacity()
 
     if currentOvercapacity > 0:
