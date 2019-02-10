@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from .models import SmartFunction, SmartDevice, SmartFunctionUnstructuredData
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 import requests
 
 def createSmartDevice_view(request):
@@ -38,19 +38,51 @@ def luftibus_on():
     luftibusTotTimeON = luftibusConfig_obj.get(smartDeviceDataKey='totTime_ON')
     luftibusTotTimeONDate = luftibusConfig_obj.get(smartDeviceDataKey='totTime_ON_Date')
 
-    luftibusLastON.smartDeviceDataValue = datetime.now()
-    luftibusTimeON.smartDeviceDataValue = 3
-    luftibusLastON.save()
+    if datetime.strptime(str(luftibusLastON.smartDeviceDataValue), "%Y-%m-%d %H:%M:%S.%f") <= datetime.strptime(str(luftibusLastOFF.smartDeviceDataValue), "%Y-%m-%d %H:%M:%S.%f"):
+      luftibusLastON.smartDeviceDataValue = datetime.now()
+      luftibusLastON.save()
+
+    timeDiff = datetime.now() - datetime.strptime(str(luftibusLastON.smartDeviceDataValue), "%Y-%m-%d %H:%M:%S.%f")
+    timeDiff = round(timeDiff.total_seconds())
+    print("time delta")
+    print(timeDiff)
+
+    luftibusTimeON.smartDeviceDataValue = timeDiff
     luftibusTimeON.save()
 
-    # luftibus_obj, created = SmartDevice.objects.get_or_create(code=code, defaults={'name': name, ...})
-    # TODO: evaluate if ON is possible based on Data
-    # TODO: finalize check to switch on or not based on Confic tot
-    event="luftibus_on"
-    requests.post("https://maker.ifttt.com/trigger/"+event+"/with/key/guXHOYmQVhhA06ScMESPWht0tyY1SjKRAexZpdJcUVY")
-    print('luftibus eingeschaltet!')
-    return "on"
+    luftibusTotTimeONDate_date = datetime.strptime(str(luftibusTotTimeONDate.smartDeviceDataValue), "%Y-%m-%d").date()
 
+    if luftibusTotTimeONDate_date == date.today():
+      if datetime.strptime(str(luftibusLastON.smartDeviceDataValue), "%Y-%m-%d %H:%M:%S.%f") <= datetime.strptime(str(luftibusLastOFF.smartDeviceDataValue), "%Y-%m-%d %H:%M:%S.%f"):
+        print("add diff")
+        luftibusTotTimeON.smartDeviceDataValue = int(luftibusTotTimeON.smartDeviceDataValue) + int(timeDiff)
+      else:
+        # TODO: fix current Hack with fix coded addition of 20 min interval
+        luftibusTotTimeON.smartDeviceDataValue = int(luftibusTotTimeON.smartDeviceDataValue) + (60*20)        
+        print("add 20min")
+    elif luftibusTotTimeONDate_date < date.today():
+      # this will not take into account all possible corner cases around midnight, but at midnight no sun is epexted to shine..
+      luftibusTotTimeON.smartDeviceDataValue = timeDiff
+      luftibusTotTimeONDate.smartDeviceDataValue = date.today()
+    else:
+      luftibusTotTimeONDate.smartDeviceDataValue = date.today()
+    
+    luftibusTotTimeONDate.save()
+    luftibusTotTimeON.save()
+
+
+    # decide wether to switch on or off depending on the total time on
+    if int(luftibusTotTimeON.smartDeviceDataValue) > (60*60*3):
+      print('luftibus soll trotzdem ausgehen!')
+      event="luftibus_off"
+      requests.post("https://maker.ifttt.com/trigger/"+event+"/with/key/guXHOYmQVhhA06ScMESPWht0tyY1SjKRAexZpdJcUVY")
+      return "trotzdem off, da luftibus heute bereits " + str(luftibusTotTimeON.smartDeviceDataValue) + " sec gelaufen ist!"
+    else:
+      event="luftibus_on"
+      requests.post("https://maker.ifttt.com/trigger/"+event+"/with/key/guXHOYmQVhhA06ScMESPWht0tyY1SjKRAexZpdJcUVY")
+      print('luftibus eingeschaltet!')
+      return "on"
+ 
 # switches luftibus off via IFTTT trigger
 def luftibus_off():
     code = "d90100"
@@ -64,7 +96,7 @@ def luftibus_off():
     luftibusTotTimeON = luftibusConfig_obj.get(smartDeviceDataKey='totTime_ON')
     
     
-    timeDiff = datetime.now() - datetime.strptime(luftibusLastON.smartDeviceDataValue, "%Y-%m-%d %H:%M:%S.%f")
+    timeDiff = datetime.now() - datetime.strptime(str(luftibusLastON.smartDeviceDataValue), "%Y-%m-%d %H:%M:%S.%f")
     timeDiff = round(timeDiff.total_seconds())
     print("time delta")
     print(timeDiff)
@@ -72,16 +104,16 @@ def luftibus_off():
     luftibusTimeON.smartDeviceDataValue = timeDiff
     luftibusTimeON.save()
     
-    # TODO: finalize check to switch off or not
-    if timeDiff > (60*15):
+    # decide wether to switch off or not depending on the time on
+    if timeDiff <= (60*15):
+      print('luftibus bleibt noch angeschaltet!')
+      # TODO: something goeas wrong with the output of the message if it jumps to on and eventhough switches off, maybe better to hard code switch on also here..
+      luftibus_on()
+      return "trotzdem on, da luftibus erst seit " + str(timeDiff) + " sec läuft!"
+    else:
       event="luftibus_off"
       requests.post("https://maker.ifttt.com/trigger/"+event+"/with/key/guXHOYmQVhhA06ScMESPWht0tyY1SjKRAexZpdJcUVY")
       print('luftibus ausgeschaltet!')
       luftibusLastOFF.smartDeviceDataValue = datetime.now()
       luftibusLastOFF.save()
       return "off"
-    else:
-      event="luftibus_on"
-      requests.post("https://maker.ifttt.com/trigger/"+event+"/with/key/guXHOYmQVhhA06ScMESPWht0tyY1SjKRAexZpdJcUVY")
-      print('luftibus bleibt noch angeschaltet!')
-      return "trotzdem on, da luftibus erst seit " + str(timeDiff) + " sec läuft!"
