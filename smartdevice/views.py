@@ -72,7 +72,7 @@ def luftibus_on():
 
 
     # decide wether to switch on or off depending on the total time on
-    if int(luftibusTotTimeON.smartDeviceDataValue) > (60*60*3):
+    if int(luftibusTotTimeON.smartDeviceDataValue) > (60*60*8):
       print('luftibus soll trotzdem ausgehen!')
       event="luftibus_off"
       requests.post("https://maker.ifttt.com/trigger/"+event+"/with/key/guXHOYmQVhhA06ScMESPWht0tyY1SjKRAexZpdJcUVY")
