@@ -110,6 +110,11 @@ def luftibus_off():
       # TODO: something goeas wrong with the output of the message if it jumps to on and eventhough switches off, maybe better to hard code switch on also here..
       luftibus_on()
       return "trotzdem on, da luftibus erst seit " + str(timeDiff) + " sec läuft!"
+    elif datetime.now().hour >= 20 and int(luftibusTotTimeON.smartDeviceDataValue) <= (60*60*3):
+      print('luftibus geht trotzdem an!')
+      # TODO: something goes wrong with the output of the message if it jumps to on and eventhough switches off, maybe better to hard code switch on also here..
+      luftibus_on()
+      return "trotzdem on, da luftibus noch keine 3h gelaufen ist!"
     else:
       event="luftibus_off"
       requests.post("https://maker.ifttt.com/trigger/"+event+"/with/key/guXHOYmQVhhA06ScMESPWht0tyY1SjKRAexZpdJcUVY")
