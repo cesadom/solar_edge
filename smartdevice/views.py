@@ -25,7 +25,7 @@ def createSmartDevice(smartDeviceData):
 
 # switches luftibus on via IFTTT trigger
 # TODO: save status and history in model and check before switching on
-def luftibus_on():
+def luftibus_on(alt_origin=None):
     code = "d90100"
     # get object with code
     luftibus_obj = SmartDevice.objects.get(code=code)
@@ -84,7 +84,7 @@ def luftibus_on():
       return "on"
  
 # switches luftibus off via IFTTT trigger
-def luftibus_off():
+def luftibus_off(alt_origin=None):
     code = "d90100"
     luftibus_obj = SmartDevice.objects.get(code=code)
     print("LUFTIBUS: " + str(luftibus_obj))
@@ -108,12 +108,12 @@ def luftibus_off():
     if timeDiff <= (60*15):
       print('luftibus bleibt noch angeschaltet!')
       # TODO: something goeas wrong with the output of the message if it jumps to on and eventhough switches off, maybe better to hard code switch on also here..
-      luftibus_on()
+      luftibus_on("off_to_on")
       return "trotzdem on, da luftibus erst seit " + str(timeDiff) + " sec läuft!"
     elif datetime.now().hour >= 20 and int(luftibusTotTimeON.smartDeviceDataValue) <= (60*60*3):
       print('luftibus geht trotzdem an!')
       # TODO: something goes wrong with the output of the message if it jumps to on and eventhough switches off, maybe better to hard code switch on also here..
-      luftibus_on()
+      luftibus_on("off_to_on")
       return "trotzdem on, da luftibus noch keine 3h gelaufen ist!"
     else:
       event="luftibus_off"
