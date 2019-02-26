@@ -555,8 +555,8 @@ def routineThread(times):
 
         print(' -------- Thread running with Interval of ' + str(bkgInterval) + ' seconds. Iteration: ' + str(i) + ' completed! -------- ')
         sys.stdout.flush()
-        
-        time.sleep(bkgInterval)
+
+        time.sleep(int(bkgInterval))
         i+=1
         
     print('Thread finished!')
