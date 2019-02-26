@@ -3,6 +3,8 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.conf import settings
+from django.core.mail import send_mail
+
 from .models import SolarSystem, SolarModule, SolarMeasurement, SolarMeasurement_power, ThreadConfig
 from weatherforecast.models import WeatherForecast, WeatherForecastDayHour
 from weatherforecast.views import sunnydays
@@ -57,12 +59,11 @@ def getSolEdgeCurrentPowerFlow():
 # returns Solar Edge Overcapacity, may also be negative due to supply from grid
 def getSolEdgeCurrentOvercapacity():
     currentPowerFlow = getSolEdgeCurrentPowerFlow()
-    print(currentPowerFlow)
+    # print(currentPowerFlow)
     if not currentPowerFlow:
-        return -1
+        return False
     else:
         return float(currentPowerFlow['siteCurrentPowerFlow']['PV']['currentPower']) - float(currentPowerFlow['siteCurrentPowerFlow']['LOAD']['currentPower'])
-
 
 @login_required
 def home(request):
@@ -466,30 +467,13 @@ def cron(request):
     currentOvercapacity = getSolEdgeCurrentOvercapacity()
     luftibus_status = "not executed!"
 
-    if currentOvercapacity > 0:
+    if not currentOvercapacity:
+        return HttpResponse('ERROR in getSolEdgeCurrentOvercapacity call')
+    elif currentOvercapacity > 0:
         luftibus_status = luftibus_on()
     else:
         luftibus_status = luftibus_off()
     return HttpResponse('all done! luftibus: ' + luftibus_status)
-
-def start_thread(request):
-    thread = Thread(target = routineThread, args = (10, ))
-    thread.start()
-    # thread.join()
-    return HttpResponse('Thread startet')
-
-def routineThread(times):
-    # for i in range(times):
-    i=0
-    while True:
-        if (not checkThreadRun()):
-            break
-        logWritten = logPowerFlow()
-        print('Thread running with Interval of ' + str(bkgInterval) + ' seconds. Iteration: ' + str(i) + ', Log written=' + str(logWritten))
-        time.sleep(bkgInterval)
-        i+=1
-        
-    print('Thread finished!')
 
 def checkThreadRun():
     ThreadConfig_obj = ThreadConfig.objects.get(threadConfig="ThreadRun")
@@ -521,6 +505,56 @@ def logPowerFlow():
     except:
         print("ERROR on writing model SolarMeasurement_power!")
         return False
+
+def start_thread(request):
+    thread = Thread(target = routineThread, args = (10, ))
+    thread.start()
+    # thread.join()
+    return HttpResponse('Thread startet')
+
+def notifyOvercapacity():
+    currentOvercapacity = getSolEdgeCurrentOvercapacity()
+    print('currentOvercapacity: ' + str(currentOvercapacity))
+    if not currentOvercapacity:
+        print('ERROR in getSolEdgeCurrentOvercapacity call!')
+        return False
+    elif currentOvercapacity > 1:
+        try:
+            send_mail(
+                subject='Luftibus App meldet ' + str(currentOvercapacity) + ' kW Überkapazität',
+                from_email=getattr(settings, 'EMAIL_HOST_USER', None),
+                recipient_list=['domenico.cesare@gmail.com'],
+                message='Wir haben ' + str(currentOvercapacity) + ' kW Überkapazität. Jetzt wäre Zeit um einen grossen Verbraucher anzuschalten!',
+                fail_silently=False,
+            )
+            print('E-Mail sent!')
+        except:
+            print('ERROR during sending E-Mail!')
+            return False
+
+    return True
+
+def routineThread(times):
+    # for i in range(times):
+    i=0
+    while True:
+        if (not checkThreadRun()):
+            break
+        
+        # Write Current Power Flow into DB log
+        logPowerFlowWritten = logPowerFlow()
+        print('Power Flow Log written = ' + str(logPowerFlowWritten))
+
+        # Check current overcapacity and notify via e-mail if exceeding 1kW
+        notifyOvercapacitySuccess = notifyOvercapacity()
+        print('Notify if overcapacity is to high successful = ' + str(notifyOvercapacitySuccess))
+
+
+        print(' -------- Thread running with Interval of ' + str(bkgInterval) + ' seconds. Iteration: ' + str(i) + ' completed! -------- ')
+        time.sleep(bkgInterval)
+        i+=1
+        
+    print('Thread finished!')
 
 
 
