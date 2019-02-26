@@ -3,7 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.conf import settings
-from .models import SolarSystem, SolarModule, SolarMeasurement
+from .models import SolarSystem, SolarModule, SolarMeasurement, SolarMeasurement_power, ThreadConfig
 from weatherforecast.models import WeatherForecast, WeatherForecastDayHour
 from weatherforecast.views import sunnydays
 from smartdevice.views import createSmartDevice, luftibus_on, luftibus_off
@@ -12,11 +12,16 @@ import requests
 import time
 from datetime import datetime, timedelta
 import dateutil.parser
-
+from threading import Thread
+from solaredge_API import solaredge
 
 # Load SolarEdge API Key and API Site ID from Configuration. Else --> set to None
 APIKEY = getattr(settings, 'SEDGE_APIKEY', None)
 APIID = getattr(settings, 'SEDGE_SITEID', None)
+
+# Load SolarEdge API 
+solE = solaredge.Solaredge(APIKEY)
+
 
 # Load worldweatheronline.com API Key and Configuration
 weatherAPIKEY = "cdb9121d690f43aca7a110709191801"
@@ -39,11 +44,11 @@ def getSolEdgeOverview():
 def getSolEdgeCurrentPowerFlow():
     api_res_site_currentPowerFlow = None
     try:
-        api_adr_site_currentPowerFlow='https://monitoringapi.solaredge.com/site/' + APIID + '/currentPowerFlow?api_key=' + APIKEY
-        api_res_site_currentPowerFlow=requests.get(api_adr_site_currentPowerFlow).json()
+        api_res_site_currentPowerFlow = solE.get_current_power_flow(APIID)
     except:
-        print('ERROR in API request!')
+        print('ERROR in API request get_current_power_flow!')
         pass
+    
     return api_res_site_currentPowerFlow
 
 # returns Solar Edge Overcapacity, may also be negative due to supply from grid
@@ -175,31 +180,35 @@ def home(request):
     """
     
     # Parse Weather API result
-    weather_api_weatherForecast = request.session['weather_api_res']['data']['weather']
-    weather_api_forecastedSunHours = dict()
-    for forecastedDate in weather_api_weatherForecast:
-        # sMeasurement, created = SolarMeasurement.objects.get_or_create(time=dateutil.parser.parse(consumptionValue['date']), defaults={'timeUnit': solarEnergyDetails['timeUnit'], 'unit': solarEnergyDetails['unit'], 'energyConsumtion': consumptionValue['value']})
-        # sMeasurement.save()
-        # sMeasurement = SolarMeasurement.objects.filter(time=dateutil.parser.parse(productionValue['date']))
-        # sMeasurement.update(energyProduction = productionValue['value'])
-        print(forecastedDate['date'])
-        weatherForecast_obj, created = WeatherForecast.objects.get_or_create(forecastDate=datetime.today().strftime('%Y-%m-%d'), date=forecastedDate['date'], defaults={'sunHours': forecastedDate['sunHour']})
-        weatherForecast_obj.save()
-        # print(forecastedDate['sunHour'])
-        value=forecastedDate['date']
-        weather_api_forecastedSunHours[value]={'sunHour': forecastedDate['sunHour']}
-        weather_api_forecastedSunHours[value]['chanceofsunshineAtDayHour'] = {}
-        for forecastedHours in forecastedDate['hourly']:
-            forecastedHoursTime_str=str(forecastedHours['time'])
-            # print(forecastedHoursTime_str)
-            forecastedHoursChanceofsunshine_str=str(forecastedHours['chanceofsunshine'])
-            # print(forecastedHoursChanceofsunshine_str)
-            weather_api_forecastedSunHours[value]['chanceofsunshineAtDayHour'][forecastedHoursTime_str] = forecastedHoursChanceofsunshine_str
-            weatherForecastDayHour_obj, created = WeatherForecastDayHour.objects.get_or_create(time=forecastedHours['time'], weatherForecast=weatherForecast_obj, chanceofsunshine=forecastedHours['chanceofsunshine'])
-        
-    print(weather_api_forecastedSunHours)
-    # print(weather_api_forecastedSunHours)
-    
+    try:
+        weather_api_weatherForecast = request.session['weather_api_res']['data']['weather']
+        weather_api_forecastedSunHours = dict()
+        for forecastedDate in weather_api_weatherForecast:
+            # sMeasurement, created = SolarMeasurement.objects.get_or_create(time=dateutil.parser.parse(consumptionValue['date']), defaults={'timeUnit': solarEnergyDetails['timeUnit'], 'unit': solarEnergyDetails['unit'], 'energyConsumtion': consumptionValue['value']})
+            # sMeasurement.save()
+            # sMeasurement = SolarMeasurement.objects.filter(time=dateutil.parser.parse(productionValue['date']))
+            # sMeasurement.update(energyProduction = productionValue['value'])
+            print(forecastedDate['date'])
+            weatherForecast_obj, created = WeatherForecast.objects.get_or_create(forecastDate=datetime.today().strftime('%Y-%m-%d'), date=forecastedDate['date'], defaults={'sunHours': forecastedDate['sunHour']})
+            weatherForecast_obj.save()
+            # print(forecastedDate['sunHour'])
+            value=forecastedDate['date']
+            weather_api_forecastedSunHours[value]={'sunHour': forecastedDate['sunHour']}
+            weather_api_forecastedSunHours[value]['chanceofsunshineAtDayHour'] = {}
+            for forecastedHours in forecastedDate['hourly']:
+                forecastedHoursTime_str=str(forecastedHours['time'])
+                # print(forecastedHoursTime_str)
+                forecastedHoursChanceofsunshine_str=str(forecastedHours['chanceofsunshine'])
+                # print(forecastedHoursChanceofsunshine_str)
+                weather_api_forecastedSunHours[value]['chanceofsunshineAtDayHour'][forecastedHoursTime_str] = forecastedHoursChanceofsunshine_str
+                weatherForecastDayHour_obj, created = WeatherForecastDayHour.objects.get_or_create(time=forecastedHours['time'], weatherForecast=weatherForecast_obj, chanceofsunshine=forecastedHours['chanceofsunshine'])
+            
+        print(weather_api_forecastedSunHours)
+        # print(weather_api_forecastedSunHours)
+    except:
+        pass
+        weather_api_forecastedSunHours = None
+
     # Create SmartDevice
     smartDevice1 = {
         'name': 'Luftentfeuchter',
@@ -341,6 +350,8 @@ def api_plain(request):
 
     if is_cached and (solarEdgeAPIKey != None) and ('cache_ts' in request.session):
         cashed_since = time.time() - request.session['cache_ts'] 
+    else:
+        cashed_since = 0
 
     try:
         print('cashed_since:')
@@ -457,3 +468,54 @@ def cron(request):
     else:
         luftibus_status = luftibus_off()
     return HttpResponse('all done! luftibus: ' + luftibus_status)
+
+def start_thread(request):
+    thread = Thread(target = routineThread, args = (10, ))
+    thread.start()
+    # thread.join()
+    return HttpResponse('Thread startet')
+
+def routineThread(times):
+    # for i in range(times):
+    i=0
+    while True:
+        if (not checkThreadRun()):
+            break
+        logWritten = logPowerFlow()
+        print('Thread running. Iteration: ' + str(i) + ', Log written=' + str(logWritten))
+        time.sleep(5*60)
+        i+=1
+        
+    print('Thread finished!')
+
+def checkThreadRun():
+    ThreadConfig_obj = ThreadConfig.objects.get(threadConfig="ThreadRun")
+    ThreadRun = ThreadConfig_obj.threadValue
+    if ThreadRun > 0:
+        return True
+    else:
+        return False
+
+def logPowerFlow():
+    sole_currPowerFlow = getSolEdgeCurrentPowerFlow()
+    unit = sole_currPowerFlow['siteCurrentPowerFlow']['unit']
+    GRIDCurrentPower = sole_currPowerFlow['siteCurrentPowerFlow']['GRID']['currentPower']
+    LOADCurrentPower = sole_currPowerFlow['siteCurrentPowerFlow']['LOAD']['currentPower']
+    PVCurrentPower = sole_currPowerFlow['siteCurrentPowerFlow']['PV']['currentPower']
+    print()
+    print("Solarstrom: " + str(PVCurrentPower) + " " + unit)
+    print("Verbrauch:  " + str(LOADCurrentPower) + " " + unit)
+    print("Netzstrom:  " + str(GRIDCurrentPower) + " " + unit)
+
+    # TODO: write Data to DB
+    try:
+        sMeasurement_power_nearReal, created = SolarMeasurement_power.objects.get_or_create(time=datetime.now(), defaults={'timeUnit': "NEARREAL", 'unit': unit, 'powerProduction': PVCurrentPower, 'powerConsumtion': LOADCurrentPower})
+        sMeasurement_power_nearReal.save()
+        print("model SolarMeasurement_power successfully written!")
+        return True
+    except:
+        print("ERROR on writing model SolarMeasurement_power!")
+        return False
+
+
+
