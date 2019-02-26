@@ -126,6 +126,8 @@ USE_TZ = True
 
 SEDGE_APIKEY = os.environ.get('SEDGE_APIKEY')
 SEDGE_SITEID = os.environ.get('SEDGE_SITEID')
+BKG_INTERVAL = os.environ.get('BKG_INTERVAL')
+
 
 # SSL/TLS Settings
 

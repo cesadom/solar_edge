@@ -15,6 +15,9 @@ import dateutil.parser
 from threading import Thread
 from solaredge_API import solaredge
 
+# Load Background Job Interval from Configuration. Else --> set to 3min
+bkgInterval = getattr(settings, 'BKG_INTERVAL', (3*60))
+
 # Load SolarEdge API Key and API Site ID from Configuration. Else --> set to None
 APIKEY = getattr(settings, 'SEDGE_APIKEY', None)
 APIID = getattr(settings, 'SEDGE_SITEID', None)
@@ -482,8 +485,8 @@ def routineThread(times):
         if (not checkThreadRun()):
             break
         logWritten = logPowerFlow()
-        print('Thread running. Iteration: ' + str(i) + ', Log written=' + str(logWritten))
-        time.sleep(5*60)
+        print('Thread running with Interval of ' + str(bkgInterval) + ' seconds. Iteration: ' + str(i) + ', Log written=' + str(logWritten))
+        time.sleep(bkgInterval)
         i+=1
         
     print('Thread finished!')
@@ -498,6 +501,8 @@ def checkThreadRun():
 
 def logPowerFlow():
     sole_currPowerFlow = getSolEdgeCurrentPowerFlow()
+    if not sole_currPowerFlow:
+        return False
     unit = sole_currPowerFlow['siteCurrentPowerFlow']['unit']
     GRIDCurrentPower = sole_currPowerFlow['siteCurrentPowerFlow']['GRID']['currentPower']
     LOADCurrentPower = sole_currPowerFlow['siteCurrentPowerFlow']['LOAD']['currentPower']
@@ -507,9 +512,9 @@ def logPowerFlow():
     print("Verbrauch:  " + str(LOADCurrentPower) + " " + unit)
     print("Netzstrom:  " + str(GRIDCurrentPower) + " " + unit)
 
-    # TODO: write Data to DB
+    # TODO: insert time considering timezone
     try:
-        sMeasurement_power_nearReal, created = SolarMeasurement_power.objects.get_or_create(time=datetime.now(), defaults={'timeUnit': "NEARREAL", 'unit': unit, 'powerProduction': PVCurrentPower, 'powerConsumtion': LOADCurrentPower})
+        sMeasurement_power_nearReal, created = SolarMeasurement_power.objects.get_or_create(time=datetime.now(), defaults={'timeUnit': "NEARREAL", 'unit': unit, 'powerProduction': PVCurrentPower, 'powerConsumtion': LOADCurrentPower, 'powerGrid': GRIDCurrentPower})
         sMeasurement_power_nearReal.save()
         print("model SolarMeasurement_power successfully written!")
         return True
