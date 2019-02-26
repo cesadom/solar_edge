@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.core.mail import send_mail
 
+import sys
 from .models import SolarSystem, SolarModule, SolarMeasurement, SolarMeasurement_power, ThreadConfig
 from weatherforecast.models import WeatherForecast, WeatherForecastDayHour
 from weatherforecast.views import sunnydays
@@ -544,13 +545,17 @@ def routineThread(times):
         # Write Current Power Flow into DB log
         logPowerFlowWritten = logPowerFlow()
         print('Power Flow Log written = ' + str(logPowerFlowWritten))
+        sys.stdout.flush()
 
         # Check current overcapacity and notify via e-mail if exceeding 1kW
         notifyOvercapacitySuccess = notifyOvercapacity()
         print('Notify if overcapacity is to high successful = ' + str(notifyOvercapacitySuccess))
+        sys.stdout.flush()
 
 
         print(' -------- Thread running with Interval of ' + str(bkgInterval) + ' seconds. Iteration: ' + str(i) + ' completed! -------- ')
+        sys.stdout.flush()
+        
         time.sleep(bkgInterval)
         i+=1
         
