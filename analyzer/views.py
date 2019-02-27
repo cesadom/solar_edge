@@ -513,18 +513,18 @@ def start_thread(request):
     # thread.join()
     return HttpResponse('Thread startet')
 
-def notifyOvercapacity():
+def notifyOvercapacity(overcapacityThreshold = 4):
     currentOvercapacity = getSolEdgeCurrentOvercapacity()
     print('currentOvercapacity: ' + str(currentOvercapacity))
     if not currentOvercapacity:
         print('ERROR in getSolEdgeCurrentOvercapacity call!')
         return False
-    elif currentOvercapacity > 1:
+    elif currentOvercapacity > overcapacityThreshold:
         try:
             send_mail(
                 subject='Luftibus App meldet ' + str(currentOvercapacity) + ' kW Überkapazität',
                 from_email=getattr(settings, 'EMAIL_HOST_USER', None),
-                recipient_list=['domenico.cesare@gmail.com'],
+                recipient_list=['domenico.cesare@gmail.com', 'juerg.leemann@gmail.com'],
                 message='Wir haben ' + str(currentOvercapacity) + ' kW Überkapazität. Jetzt wäre Zeit um einen grossen Verbraucher anzuschalten!',
                 fail_silently=False,
             )
@@ -551,7 +551,6 @@ def routineThread(times):
         notifyOvercapacitySuccess = notifyOvercapacity()
         print('Notify if overcapacity is to high successful = ' + str(notifyOvercapacitySuccess))
         sys.stdout.flush()
-
 
         print(' -------- Thread running with Interval of ' + str(bkgInterval) + ' seconds. Iteration: ' + str(i) + ' completed! -------- ')
         sys.stdout.flush()
