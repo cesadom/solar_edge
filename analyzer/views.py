@@ -489,10 +489,16 @@ def logPowerFlow():
     if not sole_currPowerFlow:
         return False
     unit = sole_currPowerFlow['siteCurrentPowerFlow']['unit']
-    GRIDCurrentPower = sole_currPowerFlow['siteCurrentPowerFlow']['GRID']['currentPower']
+    
+    # Check if power flows from Grid (1) or into Grid (-1)
+    if sole_currPowerFlow['siteCurrentPowerFlow']['connections'][0]['from'] == "GRID":
+        powerFromGrid = 1
+    else:
+        powerFromGrid = -1
+
+    GRIDCurrentPower = sole_currPowerFlow['siteCurrentPowerFlow']['GRID']['currentPower'] * powerFromGrid
     LOADCurrentPower = sole_currPowerFlow['siteCurrentPowerFlow']['LOAD']['currentPower']
     PVCurrentPower = sole_currPowerFlow['siteCurrentPowerFlow']['PV']['currentPower']
-    print()
     print("Solarstrom: " + str(PVCurrentPower) + " " + unit)
     print("Verbrauch:  " + str(LOADCurrentPower) + " " + unit)
     print("Netzstrom:  " + str(GRIDCurrentPower) + " " + unit)
@@ -538,6 +544,7 @@ def notifyOvercapacity(overcapacityThreshold = 4):
 def routineThread(times):
     # for i in range(times):
     i=0
+
     while True:
         if (not checkThreadRun()):
             break
