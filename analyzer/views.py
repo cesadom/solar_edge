@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 
 import sys
-from .models import SolarSystem, SolarModule, SolarMeasurement, SolarMeasurement_power, ThreadConfig
+from .models import SolarSystem, SolarModule, SolarMeasurement, SolarMeasurement_power, ThreadConfig, GeneralConfig
 from weatherforecast.models import WeatherForecast, WeatherForecastDayHour
 from weatherforecast.views import sunnydays
 from smartdevice.views import createSmartDevice, luftibus_on, luftibus_off
@@ -519,6 +519,53 @@ def start_thread(request):
     # thread.join()
     return HttpResponse('Thread startet')
 
+def checkLastSentEmail(recipList):
+    truncRecipList = (recipList[:145] + '..') if len(recipList) > 145 else recipList
+    truncRecipList = "LastSentEmail" + str(truncRecipList)
+    generalConfig_obj = GeneralConfig.objects.filter(generalConfigKey=truncRecipList)
+    # If it is the first e-mail sent to this recipient list, no object will be returned --> send e-mail
+    if not generalConfig_obj:
+        return True
+
+    # If an e-mail has already been sent to this recipient list, an object will be returned
+    lastSentEmailDate = datetime.strptime(generalConfig_obj[0].generalConfigValue, '%Y-%m-%d %H:%M:%S.%f')
+    timeDelta = datetime.now()-lastSentEmailDate
+
+    # If the last e-mail has been sent within the last 4 hours --> don't send e-mail, else send e-mail
+    if timeDelta.total_seconds() <= (4*60*60):
+        print("es sind erst " + str(timeDelta.total_seconds()/60/60) + " Stunden vergangen seit dem letzten E-Mail Versand!")
+        return False
+    else:
+        return True
+
+def sendMailToRecipList(emailSubject, emailMessage, recipList = ['domenico.cesare@gmail.com']):
+    if checkLastSentEmail(recipList):
+        print(emailSubject)
+        print(emailMessage)
+        print(recipList)
+        # try:
+        send_mail(
+            subject=emailSubject,
+            from_email=getattr(settings, 'EMAIL_HOST_USER', None),
+            recipient_list=recipList,
+            message=emailMessage,
+            fail_silently=False,
+        )
+        truncRecipList = (recipList[:145] + '..') if len(recipList) > 145 else recipList
+        truncRecipList = "LastSentEmail" + str(truncRecipList)
+        lastSentEmailDate, created = GeneralConfig.objects.get_or_create(generalConfigKey=truncRecipList, defaults={'generalConfigValue': datetime.now()})
+        lastSentEmailDate.save()
+
+        print('E-Mail sent to ' + str(recipList))
+        return True
+        # except:
+        #     print('ERROR during sending E-Mail!')
+        #     return False
+    else:
+        return True
+
+
+
 def notifyOvercapacity(overcapacityThreshold = 4):
     currentOvercapacity = getSolEdgeCurrentOvercapacity()
     print('currentOvercapacity: ' + str(currentOvercapacity))
@@ -526,20 +573,14 @@ def notifyOvercapacity(overcapacityThreshold = 4):
         print('ERROR in getSolEdgeCurrentOvercapacity call!')
         return False
     elif currentOvercapacity > overcapacityThreshold:
-        try:
-            send_mail(
-                subject='Luftibus App meldet ' + str(currentOvercapacity) + ' kW Überkapazität',
-                from_email=getattr(settings, 'EMAIL_HOST_USER', None),
-                recipient_list=['domenico.cesare@gmail.com', 'juerg.leemann@gmail.com'],
-                message='Wir haben ' + str(currentOvercapacity) + ' kW Überkapazität. Jetzt wäre Zeit um einen grossen Verbraucher anzuschalten!',
-                fail_silently=False,
-            )
-            print('E-Mail sent!')
-        except:
-            print('ERROR during sending E-Mail!')
-            return False
-
-    return True
+        emailSbj = 'Luftibus App meldet ' + str(currentOvercapacity) + ' kW Überkapazität'
+        emailMsg = 'Wir haben ' + str(currentOvercapacity) + ' kW Überkapazität. Jetzt wäre es Zeit einen grossen Verbraucher anzuschalten!'
+        emailRcp = ['domenico.cesare@gmail.com', 'juerg.leemann@gmail.com']
+        emailRcp = ['domenico.cesare@gmail.com']
+        emailSuccess = sendMailToRecipList(emailSbj, emailMsg, emailRcp)
+        return emailSuccess
+    else:
+        return True
 
 def routineThread(times):
     # for i in range(times):

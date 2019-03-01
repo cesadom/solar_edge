@@ -48,3 +48,16 @@ class ThreadConfig(models.Model):
     
     def __str__(self):
         return "ThreadConfig: " + str(self.threadConfig) + " = " + str(self.threadValue)
+
+class GeneralConfig(models.Model):
+    generalConfigGroup = models.CharField(max_length=20)
+    generalConfigKey = models.CharField(max_length=150)
+    generalConfigValue = models.CharField(max_length=150)
+    
+    def __str__(self):
+        if not self.generalConfigGroup:
+            varGeneralConfigGroup = "keine Gruppe"
+        else:
+            varGeneralConfigGroup = self.generalConfigGroup
+        return "Config: " + str(self.generalConfigKey) + " = " + str(self.generalConfigValue) + " (" + str(varGeneralConfigGroup) + ")"
+
