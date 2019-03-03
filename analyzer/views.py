@@ -576,7 +576,7 @@ def notifyOvercapacity(overcapacityThreshold = 4):
         emailSbj = 'Luftibus App meldet ' + str(currentOvercapacity) + ' kW Überkapazität'
         emailMsg = 'Wir haben ' + str(currentOvercapacity) + ' kW Überkapazität. Jetzt wäre es Zeit einen grossen Verbraucher anzuschalten!'
         emailRcp = ['domenico.cesare@gmail.com', 'juerg.leemann@gmail.com']
-        emailRcp = ['domenico.cesare@gmail.com']
+        # emailRcp = ['domenico.cesare@gmail.com']
         emailSuccess = sendMailToRecipList(emailSbj, emailMsg, emailRcp)
         return emailSuccess
     else:
