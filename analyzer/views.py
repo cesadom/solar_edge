@@ -554,6 +554,7 @@ def sendMailToRecipList(emailSubject, emailMessage, recipList = ['domenico.cesar
         truncRecipList = (recipList[:145] + '..') if len(recipList) > 145 else recipList
         truncRecipList = "LastSentEmail" + str(truncRecipList)
         lastSentEmailDate, created = GeneralConfig.objects.get_or_create(generalConfigKey=truncRecipList, defaults={'generalConfigValue': datetime.now()})
+        lastSentEmailDate.generalConfigValue=datetime.now()
         lastSentEmailDate.save()
 
         print('E-Mail sent to ' + str(recipList))
@@ -566,7 +567,7 @@ def sendMailToRecipList(emailSubject, emailMessage, recipList = ['domenico.cesar
 
 
 
-def notifyOvercapacity(overcapacityThreshold = 4):
+def notifyOvercapacity(overcapacityThreshold = 3.5):
     currentOvercapacity = getSolEdgeCurrentOvercapacity()
     print('currentOvercapacity: ' + str(currentOvercapacity))
     if not currentOvercapacity:
