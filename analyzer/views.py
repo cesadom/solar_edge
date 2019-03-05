@@ -8,12 +8,12 @@ from django.core.mail import send_mail
 import sys
 from .models import SolarSystem, SolarModule, SolarMeasurement, SolarMeasurement_power, ThreadConfig, GeneralConfig
 from weatherforecast.models import WeatherForecast, WeatherForecastDayHour
-from weatherforecast.views import sunnydays
+from weatherforecast.views import sunnydays, sunPerDay, logWeatherForecast
 from smartdevice.views import createSmartDevice, luftibus_on, luftibus_off
 import solaredge
 import requests
 import time
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 import dateutil.parser
 from threading import Thread
 from solaredge_API import solaredge
@@ -533,7 +533,7 @@ def checkLastSentEmail(recipList):
 
     # If the last e-mail has been sent within the last 4 hours --> don't send e-mail, else send e-mail
     if timeDelta.total_seconds() <= (4*60*60):
-        print("es sind erst " + str(timeDelta.total_seconds()/60/60) + " Stunden vergangen seit dem letzten E-Mail Versand!")
+        print("es sind erst " + str(round(timeDelta.total_seconds()/60/60,3)) + " Stunden vergangen seit dem letzten E-Mail Versand!")
         return False
     else:
         return True
@@ -567,16 +567,16 @@ def sendMailToRecipList(emailSubject, emailMessage, recipList = ['domenico.cesar
 
 
 
-def notifyOvercapacity(overcapacityThreshold = 3.5):
+def notifyOvercapacity(overcapacityThreshold = getattr(settings, 'OVERCAP_NOTIF_THRESHOLD', 3.5)):
     currentOvercapacity = getSolEdgeCurrentOvercapacity()
     print('currentOvercapacity: ' + str(currentOvercapacity))
     if not currentOvercapacity:
         print('ERROR in getSolEdgeCurrentOvercapacity call!')
         return False
     elif currentOvercapacity > overcapacityThreshold:
-        emailSbj = 'Luftibus App meldet ' + str(currentOvercapacity) + ' kW Überkapazität'
-        emailMsg = 'Wir haben ' + str(currentOvercapacity) + ' kW Überkapazität. Jetzt wäre es Zeit einen grossen Verbraucher anzuschalten!'
-        emailRcp = ['domenico.cesare@gmail.com', 'juerg.leemann@gmail.com']
+        emailSbj = 'Luftibus App meldet ' + str(round(currentOvercapacity,2)) + ' kW Überkapazität'
+        emailMsg = 'Wir haben ' + str(round(currentOvercapacity,2)) + ' kW Überkapazität. Jetzt wäre es Zeit einen grossen Verbraucher anzuschalten!'
+        emailRcp = getattr(settings, 'NOTIF_THRESHOLD_RECIP', "domenico.cesare@gmail.com").split(';')
         # emailRcp = ['domenico.cesare@gmail.com']
         emailSuccess = sendMailToRecipList(emailSbj, emailMsg, emailRcp)
         return emailSuccess
@@ -599,6 +599,11 @@ def routineThread(times):
         # Check current overcapacity and notify via e-mail if exceeding 1kW
         notifyOvercapacitySuccess = notifyOvercapacity()
         print('Notify if overcapacity is to high successful = ' + str(notifyOvercapacitySuccess))
+        sys.stdout.flush()
+
+        # Write Weatherforecast in DB
+        logWeatherFCSuccess = logWeatherForecast()
+        print('Log Weatherforecast into DB successful = ' + str(logWeatherFCSuccess))
         sys.stdout.flush()
 
         print(' -------- Thread running with Interval of ' + str(bkgInterval) + ' seconds. Iteration: ' + str(i) + ' completed! -------- ')

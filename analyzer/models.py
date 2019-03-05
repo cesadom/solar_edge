@@ -28,7 +28,7 @@ class SolarMeasurement(models.Model):
     energyConsumtion = models.PositiveIntegerField(default=None, blank=True, null=True)
     
     def __str__(self):
-        return str(self.time) + " - energy production: " + str(self.energyProduction) + " " + self.unit + ", energy consumtion: " + str(self.powerConsumtion) + " " + self.unit + " per " + self.timeUnit
+        return str(self.time) + " - energy production: " + str(self.energyProduction) + " " + self.unit + ", energy consumtion: " + str(self.energyConsumtion) + " " + self.unit + " per " + self.timeUnit
 
 class SolarMeasurement_power(models.Model):
     solModule = models.ForeignKey(SolarModule, on_delete=models.CASCADE, blank=True, null=True)

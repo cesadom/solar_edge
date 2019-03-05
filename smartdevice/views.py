@@ -3,6 +3,8 @@ from .models import SmartFunction, SmartDevice, SmartFunctionUnstructuredData
 from datetime import date, datetime, timedelta
 import requests
 
+from weatherforecast.views import sunnydays, sunPerDay, logWeatherForecast
+
 def createSmartDevice_view(request):
   # TODO: Implement django.forms
   if 'data' in POST:
@@ -38,50 +40,49 @@ def luftibus_on(reason=None):
     luftibusLastOFF_date = datetime.strptime(str(luftibusLastOFF.smartDeviceDataValue), "%Y-%m-%d %H:%M:%S.%f")
     luftibusTimeON = luftibusConfig_obj.get(smartDeviceDataKey='time_ON')
     luftibusTotTimeON = luftibusConfig_obj.get(smartDeviceDataKey='totTime_ON')
+    luftibusTotTimeON_int = int(luftibusTotTimeON.smartDeviceDataValue)
     luftibusTotTimeONDate = luftibusConfig_obj.get(smartDeviceDataKey='totTime_ON_Date')
     luftibusTotTimeONDate_date = datetime.strptime(str(luftibusTotTimeONDate.smartDeviceDataValue), "%Y-%m-%d").date()
-
-    if luftibusLastON_date <= luftibusLastOFF_date:
-      luftibusLastON.smartDeviceDataValue = datetime.now()
-      luftibusLastON.save()
-
-    timeDiff = datetime.now() - luftibusLastON_date
-    timeDiff = round(timeDiff.total_seconds())
-    print("time delta")
-    print(timeDiff)
-
-    luftibusTimeON.smartDeviceDataValue = timeDiff
-    luftibusTimeON.save()
-
-    if luftibusTotTimeONDate_date == date.today():
-      if luftibusLastON_date <= luftibusLastOFF_date:
-        print("add diff")
-        luftibusTotTimeON.smartDeviceDataValue = int(luftibusTotTimeON.smartDeviceDataValue) + int(timeDiff)
-      else:
-        # TODO: fix current Hack with fix coded addition of 20 min interval
-        luftibusTotTimeON.smartDeviceDataValue = int(luftibusTotTimeON.smartDeviceDataValue) + (60*20)        
-        print("add 20min")
-    elif luftibusTotTimeONDate_date < date.today():
-      # this will not take into account all possible corner cases around midnight, but at midnight no sun is epexted to shine..
-      luftibusTotTimeON.smartDeviceDataValue = timeDiff
-      luftibusTotTimeONDate.smartDeviceDataValue = date.today()
-    else:
-      luftibusTotTimeONDate.smartDeviceDataValue = date.today()
-    
-    luftibusTotTimeONDate.save()
-    luftibusTotTimeON.save()
-
 
     # decide wether to switch on or off depending on the total time on
     if int(luftibusTotTimeON.smartDeviceDataValue) > (60*60*8):
       print('luftibus soll trotzdem ausgehen!')
-      event="luftibus_off"
-      requests.post("https://maker.ifttt.com/trigger/"+event+"/with/key/guXHOYmQVhhA06ScMESPWht0tyY1SjKRAexZpdJcUVY")
+      # switch off due to max time exceeded
+      luftibus_off("maxTimeExceeded")
       return "trotzdem off, da luftibus heute bereits " + str(luftibusTotTimeON.smartDeviceDataValue) + " sec gelaufen ist!"
     else:
       event="luftibus_on"
       requests.post("https://maker.ifttt.com/trigger/"+event+"/with/key/guXHOYmQVhhA06ScMESPWht0tyY1SjKRAexZpdJcUVY")
       print('luftibus eingeschaltet!')
+      
+      timeDiff = datetime.now() - luftibusLastON_date
+      timeDiff = round(timeDiff.total_seconds())
+      print("time delta")
+      print(timeDiff)
+      luftibusTimeON.smartDeviceDataValue = timeDiff
+      luftibusTimeON.save()
+      luftibusLastON.smartDeviceDataValue = datetime.now()
+      luftibusLastON.save()
+      
+      # if luftibus has switched from off to on, then no time has to be added to the TotTimeONDate, return already here
+      if luftibusLastON_date < luftibusLastOFF_date:
+        return "on"
+
+      # check if the date the TotTimeONDate has been calculated, if it is from today add the diff to it...
+      if luftibusTotTimeONDate_date == date.today():
+        print("add diff")
+        luftibusTotTimeON.smartDeviceDataValue = int(luftibusTotTimeON.smartDeviceDataValue) + int(timeDiff)
+      # ... if it is from yasterday reset the value with the diff value and set the date to today
+      elif luftibusTotTimeONDate_date < date.today():
+        # this will not take into account all possible corner cases around midnight, but at midnight no sun is expected to shine..
+        luftibusTotTimeON.smartDeviceDataValue = timeDiff
+        luftibusTotTimeONDate.smartDeviceDataValue = date.today()
+      # ... if the date is not set or in any other case set the date to today 
+      else:
+        luftibusTotTimeONDate.smartDeviceDataValue = date.today()
+      luftibusTotTimeONDate.save()
+      luftibusTotTimeON.save()
+      
       return "on"
  
 # switches luftibus off via IFTTT trigger
@@ -94,9 +95,12 @@ def luftibus_off(reason=None):
     luftibusLastON = luftibusConfig_obj.get(smartDeviceDataKey='last_ON')
     luftibusLastON_date = datetime.strptime(str(luftibusLastON.smartDeviceDataValue), "%Y-%m-%d %H:%M:%S.%f")
     luftibusLastOFF = luftibusConfig_obj.get(smartDeviceDataKey='last_OFF')
+    luftibusLastOFF_date = datetime.strptime(str(luftibusLastOFF.smartDeviceDataValue), "%Y-%m-%d %H:%M:%S.%f")
     luftibusTimeON = luftibusConfig_obj.get(smartDeviceDataKey='time_ON')
     luftibusTotTimeON = luftibusConfig_obj.get(smartDeviceDataKey='totTime_ON')
     luftibusTotTimeON_int = int(luftibusTotTimeON.smartDeviceDataValue)
+    luftibusTotTimeONDate = luftibusConfig_obj.get(smartDeviceDataKey='totTime_ON_Date')
+    luftibusTotTimeONDate_date = datetime.strptime(str(luftibusTotTimeONDate.smartDeviceDataValue), "%Y-%m-%d").date()
     
     
     timeDiff = datetime.now() - luftibusLastON_date
@@ -113,7 +117,7 @@ def luftibus_off(reason=None):
       # TODO: something goes wrong with the output of the message if it jumps to on and eventhough switches off, implement decorators.
       luftibus_on("off_to_on_minTimeON")
       return "trotzdem on, da luftibus erst seit " + str(timeDiff) + " sec läuft!"
-    elif datetime.now().hour >= 20 and luftibusTotTimeON_int <= (60*60*3):
+    elif datetime.now().hour >= 20 and luftibusTotTimeON_int <= (60*60*3) and sunPerDay(date.today() + timedelta(1)) < 4:
       print('luftibus geht trotzdem an!')
       # TODO: something goes wrong with the output of the message if it jumps to on and eventhough switches off, implement decorators.
       luftibus_on("off_to_on_maxTimeNotReached")
