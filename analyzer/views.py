@@ -573,7 +573,7 @@ def notifyOvercapacity(overcapacityThreshold = getattr(settings, 'OVERCAP_NOTIF_
     if not currentOvercapacity:
         print('ERROR in getSolEdgeCurrentOvercapacity call!')
         return False
-    elif currentOvercapacity > overcapacityThreshold:
+    elif float(currentOvercapacity) > float(overcapacityThreshold):
         emailSbj = 'Luftibus App meldet ' + str(round(currentOvercapacity,2)) + ' kW Überkapazität'
         emailMsg = 'Wir haben ' + str(round(currentOvercapacity,2)) + ' kW Überkapazität. Jetzt wäre es Zeit einen grossen Verbraucher anzuschalten!'
         emailRcp = getattr(settings, 'NOTIF_THRESHOLD_RECIP', "domenico.cesare@gmail.com").split(';')

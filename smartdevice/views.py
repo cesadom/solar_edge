@@ -57,8 +57,7 @@ def luftibus_on(reason=None):
       
       timeDiff = datetime.now() - luftibusLastON_date
       timeDiff = round(timeDiff.total_seconds())
-      print("time delta")
-      print(timeDiff)
+      print("time diff: " + str(timeDiff))
       luftibusTimeON.smartDeviceDataValue = timeDiff
       luftibusTimeON.save()
       luftibusLastON.smartDeviceDataValue = datetime.now()
@@ -66,15 +65,17 @@ def luftibus_on(reason=None):
       
       # if luftibus has switched from off to on, then no time has to be added to the TotTimeONDate, return already here
       if luftibusLastON_date < luftibusLastOFF_date:
+        print("just switched on")
         return "on"
 
       # check if the date the TotTimeONDate has been calculated, if it is from today add the diff to it...
       if luftibusTotTimeONDate_date == date.today():
-        print("add diff")
+        print("add diff to TotTimeON")
         luftibusTotTimeON.smartDeviceDataValue = int(luftibusTotTimeON.smartDeviceDataValue) + int(timeDiff)
       # ... if it is from yasterday reset the value with the diff value and set the date to today
       elif luftibusTotTimeONDate_date < date.today():
         # this will not take into account all possible corner cases around midnight, but at midnight no sun is expected to shine..
+        print("set TotTimeON to diff")
         luftibusTotTimeON.smartDeviceDataValue = timeDiff
         luftibusTotTimeONDate.smartDeviceDataValue = date.today()
       # ... if the date is not set or in any other case set the date to today 
@@ -105,8 +106,7 @@ def luftibus_off(reason=None):
     
     timeDiff = datetime.now() - luftibusLastON_date
     timeDiff = round(timeDiff.total_seconds())
-    print("time delta")
-    print(timeDiff)
+    print("time diff: " + str(timeDiff))
 
     luftibusTimeON.smartDeviceDataValue = timeDiff
     luftibusTimeON.save()
