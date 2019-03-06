@@ -15,6 +15,7 @@ import requests
 import time
 from datetime import date, datetime, timedelta
 import dateutil.parser
+import threading
 from threading import Thread
 from solaredge_API import solaredge
 
@@ -514,8 +515,11 @@ def logPowerFlow():
         return False
 
 def start_thread(request):
-    thread = Thread(target = routineThread, args = (10, ))
-    thread.start()
+    if not bgTask_thread.isAlive():
+        bgTask_thread.start()
+        print("####### NEW THREAD STARTED #######")
+    else:
+        print("####### !!THREAD IS ALREADY RUNNING!! #######")
     # thread.join()
     return HttpResponse('Thread startet')
 
@@ -613,6 +617,9 @@ def routineThread(times):
         i+=1
         
     print('Thread finished!')
+
+# initiate global thread for background task
+bgTask_thread = Thread(target = routineThread, args = (10, ))
 
 
 
