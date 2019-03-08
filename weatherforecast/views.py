@@ -26,7 +26,7 @@ def sunPerDay(day=date.today()):
 		print(weatherForecast_obj) 
 		
 		# take weatherForecast_obj.sunHours
-		return weatherForecast_obj
+		return weatherForecast_obj.sunHours
 	except:
 		print("ERROR on reading WeatherForecast!")
 		return False
