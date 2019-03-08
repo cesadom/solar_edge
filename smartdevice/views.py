@@ -26,7 +26,7 @@ def createSmartDevice(smartDeviceData):
   return smartDevice
 
 # switches luftibus on via IFTTT trigger
-# TODO: save status and history in model and check before switching on
+# TODO: save history in model
 def luftibus_on(reason=None):
     code = "d90100"
     # get object with code
@@ -45,7 +45,7 @@ def luftibus_on(reason=None):
     luftibusTotTimeONDate_date = datetime.strptime(str(luftibusTotTimeONDate.smartDeviceDataValue), "%Y-%m-%d").date()
 
     # decide wether to switch on or off depending on the total time on
-    if int(luftibusTotTimeON.smartDeviceDataValue) > (60*60*8):
+    if int(luftibusTotTimeON.smartDeviceDataValue) > (60*60*8) and not reason:
       print('luftibus soll trotzdem ausgehen!')
       # switch off due to max time exceeded
       luftibus_off("maxTimeExceeded")
@@ -85,7 +85,7 @@ def luftibus_on(reason=None):
       luftibusTotTimeON.save()
       
       return "on"
- 
+
 # switches luftibus off via IFTTT trigger
 def luftibus_off(reason=None):
     code = "d90100"
@@ -112,12 +112,12 @@ def luftibus_off(reason=None):
     luftibusTimeON.save()
     
     # decide wether to switch off or not depending on the time on
-    if timeDiff <= (60*15):
+    if timeDiff <= (60*15) and not reason:
       print('luftibus bleibt noch angeschaltet!')
       # TODO: something goes wrong with the output of the message if it jumps to on and eventhough switches off, implement decorators.
       luftibus_on("off_to_on_minTimeON")
       return "trotzdem on, da luftibus erst seit " + str(timeDiff) + " sec läuft!"
-    elif datetime.now().hour >= 20 and luftibusTotTimeON_int <= (60*60*3) and sunPerDay(date.today() + timedelta(1)) < 4:
+    elif datetime.now().hour >= 20 and luftibusTotTimeON_int <= (60*60*3) and sunPerDay(date.today() + timedelta(1)) < 4 and not reason:
       print('luftibus geht trotzdem an!')
       # TODO: something goes wrong with the output of the message if it jumps to on and eventhough switches off, implement decorators.
       luftibus_on("off_to_on_maxTimeNotReached")
