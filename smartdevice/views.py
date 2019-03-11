@@ -117,7 +117,8 @@ def luftibus_off(reason=None):
       # TODO: something goes wrong with the output of the message if it jumps to on and eventhough switches off, implement decorators.
       luftibus_on("off_to_on_minTimeON")
       return "trotzdem on, da luftibus erst seit " + str(timeDiff) + " sec läuft!"
-    elif datetime.now().hour >= 20 and luftibusTotTimeON_int <= (60*60*3) and sunPerDay(date.today() + timedelta(1)) < 4:
+#    elif datetime.now().hour >= 20 and luftibusTotTimeON_int <= (60*60*3) and sunPerDay(date.today() + timedelta(1)) < 4:
+    elif datetime.now().hour >= 20 and luftibusTotTimeON_int <= (60*60*3):
       print('luftibus geht trotzdem an!')
       # TODO: something goes wrong with the output of the message if it jumps to on and eventhough switches off, implement decorators.
       luftibus_on("off_to_on_maxTimeNotReached")
