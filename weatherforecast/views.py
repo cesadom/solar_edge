@@ -62,7 +62,7 @@ def logWeatherForecast():
 				forecastedHoursTime_str=str(forecastedHours['time'])
 				# print("forecastedHoursTime_str: " + forecastedHoursTime_str)
 				forecastedHoursChanceofsunshine_str=str(forecastedHours['chanceofsunshine'])
-				print(forecastedDate['date'] + ":" + forecastedHoursTime_str + " -> " + forecastedHoursChanceofsunshine_str + " %")
+				# print(forecastedDate['date'] + ":" + forecastedHoursTime_str + " -> " + forecastedHoursChanceofsunshine_str + " %")
 				weather_api_forecastedSunHours[value]['chanceofsunshineAtDayHour'][forecastedHoursTime_str] = forecastedHoursChanceofsunshine_str
 				weatherForecastDayHour_obj, created = WeatherForecastDayHour.objects.get_or_create(time=forecastedHours['time'], weatherForecast=weatherForecast_obj, chanceofsunshine=forecastedHours['chanceofsunshine'])
 		# print(weather_api_forecastedSunHours)
