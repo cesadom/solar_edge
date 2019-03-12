@@ -102,7 +102,8 @@ def luftibus_off(reason=None):
     luftibusTotTimeON_int = int(luftibusTotTimeON.smartDeviceDataValue)
     luftibusTotTimeONDate = luftibusConfig_obj.get(smartDeviceDataKey='totTime_ON_Date')
     luftibusTotTimeONDate_date = datetime.strptime(str(luftibusTotTimeONDate.smartDeviceDataValue), "%Y-%m-%d").date()
-    
+    luftibusLastSkippedForcedOn = luftibusConfig_obj.get(smartDeviceDataKey='last_skipped_forced_ON')
+    luftibusLastSkippedForcedOn_date = datetime.strptime(str(luftibusLastSkippedForcedOn.smartDeviceDataValue), "%Y-%m-%d").date()
     
     timeDiff = datetime.now() - luftibusLastON_date
     timeDiff = round(timeDiff.total_seconds())
@@ -111,10 +112,13 @@ def luftibus_off(reason=None):
     luftibusTimeON.smartDeviceDataValue = timeDiff
     luftibusTimeON.save()
     
-    if sunPerDay(date.today() + timedelta(1)) < 4:
-      sunTomorrow = False
-    else:
+    daysLastSkippedForcedOn = date.today() - luftibusLastSkippedForcedOn_date 
+
+    if sunPerDay(date.today() + timedelta(1)) >= 4:
       sunTomorrow = True
+      luftibusLastSkippedForcedOn.smartDeviceDataValue = date.today()
+    else:
+      sunTomorrow = False
 
     # decide wether to switch off or not depending on the time on
     if timeDiff <= (60*15) and not reason:
@@ -122,7 +126,7 @@ def luftibus_off(reason=None):
       # TODO: something goes wrong with the output of the message if it jumps to on and eventhough switches off, implement decorators.
       luftibus_on("off_to_on_minTimeON")
       return "trotzdem on, da luftibus erst seit " + str(timeDiff) + " sec läuft!"
-    elif datetime.now().hour >= 20 and luftibusTotTimeON_int <= (60*60*3) and not sunTomorrow and not reason:
+    elif datetime.now().hour >= 20 and luftibusTotTimeON_int <= (60*60*3) and not sunTomorrow and daysLastSkippedForcedOn <= 1 and not reason:
       print('luftibus geht trotzdem an!')
       # TODO: something goes wrong with the output of the message if it jumps to on and eventhough switches off, implement decorators.
       luftibus_on("off_to_on_maxTimeNotReached")
