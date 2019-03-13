@@ -55,6 +55,7 @@ def luftibus_on(reason=None):
       requests.post("https://maker.ifttt.com/trigger/"+event+"/with/key/guXHOYmQVhhA06ScMESPWht0tyY1SjKRAexZpdJcUVY")
       print('luftibus eingeschaltet!')
       
+      # TODO move check from below if last on later than las off, else timeDiff=0
       timeDiff = datetime.now() - luftibusLastON_date
       timeDiff = round(timeDiff.total_seconds())
       print("time diff: " + str(timeDiff))
