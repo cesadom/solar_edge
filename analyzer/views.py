@@ -471,7 +471,7 @@ def cron(request):
 
     if not currentOvercapacity:
         return HttpResponse('ERROR in getSolEdgeCurrentOvercapacity call')
-    elif currentOvercapacity > 0:
+    elif float(currentOvercapacity) > 0.5:
         luftibus_status = luftibus_on()
     else:
         luftibus_status = luftibus_off()
