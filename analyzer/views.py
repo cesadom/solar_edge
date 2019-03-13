@@ -621,9 +621,9 @@ def routineThread(times):
         sys.stdout.flush()
         
         # Switch luftibus
-        switchLuftibusSuccess = switchLuftibus()
-        print('Switch luftibus successful = ' + str(switchLuftibusSuccess))
-        sys.stdout.flush()
+        # switchLuftibusSuccess = switchLuftibus()
+        # print('Switch luftibus successful = ' + str(switchLuftibusSuccess))
+        # sys.stdout.flush()
 
         print(' -------- Thread running with Interval of ' + str(bkgInterval) + ' seconds. Iteration: ' + str(i) + ' completed! -------- ')
         sys.stdout.flush()
