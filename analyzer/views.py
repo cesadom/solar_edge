@@ -463,6 +463,14 @@ def about(request):
     return render(request, 'analyzer/about.html', {'title': 'About'})
 
 def cron(request):
+    luftibus_status = switchLuftibus()
+
+    if not luftibus_status:
+        return HttpResponse('ERROR in getSolEdgeCurrentOvercapacity call')
+    else:
+        return HttpResponse('all done! luftibus: ' + luftibus_status)
+
+def switchLuftibus():
     # mostsunnydays = sunnydays(datetime.now, datetime.now() + timedelta(10))
     # print(getSolEdgeCurrentOvercapacity())
 
@@ -470,12 +478,13 @@ def cron(request):
     luftibus_status = "not executed!"
 
     if not currentOvercapacity:
-        return HttpResponse('ERROR in getSolEdgeCurrentOvercapacity call')
+        return False
     elif float(currentOvercapacity) > 0.5:
         luftibus_status = luftibus_on()
     else:
         luftibus_status = luftibus_off()
-    return HttpResponse('all done! luftibus: ' + luftibus_status)
+    return luftibus_status
+
 
 def checkThreadRun():
     ThreadConfig_obj = ThreadConfig.objects.get(threadConfig="ThreadRun")
@@ -609,6 +618,11 @@ def routineThread(times):
         # Write Weatherforecast in DB
         logWeatherFCSuccess = logWeatherForecast()
         print('Log Weatherforecast into DB successful = ' + str(logWeatherFCSuccess))
+        sys.stdout.flush()
+        
+        # Switch luftibus
+        switchLuftibusSuccess = switchLuftibus()
+        print('Switch luftibus successful = ' + str(switchLuftibusSuccess))
         sys.stdout.flush()
 
         print(' -------- Thread running with Interval of ' + str(bkgInterval) + ' seconds. Iteration: ' + str(i) + ' completed! -------- ')
