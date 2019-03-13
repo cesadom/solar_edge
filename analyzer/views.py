@@ -518,10 +518,11 @@ def start_thread(request):
     if not bgTask_thread.isAlive():
         bgTask_thread.start()
         print("####### NEW THREAD STARTED #######")
+        return HttpResponse('Thread startet')
     else:
         print("####### !!THREAD IS ALREADY RUNNING!! #######")
+        return HttpResponse('Thread läuft bereits!!!!')
     # thread.join()
-    return HttpResponse('Thread startet')
 
 def checkLastSentEmail(recipList):
     truncRecipList = (recipList[:145] + '..') if len(recipList) > 145 else recipList
