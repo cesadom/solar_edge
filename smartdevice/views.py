@@ -115,7 +115,7 @@ def luftibus_off(reason=None):
     
     daysLastSkippedForcedOn = date.today() - luftibusLastSkippedForcedOn_date 
 
-    if sunPerDay(date.today() + timedelta(1)) >= 4:
+    if sunPerDay(date.today() + timedelta(1)) >= 10:
       sunTomorrow = True
       luftibusLastSkippedForcedOn.smartDeviceDataValue = date.today()
     else:
