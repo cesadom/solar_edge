@@ -28,7 +28,7 @@ def sunPerDay(day=date.today()):
 		# take weatherForecast_obj.sunHours
 		return weatherForecast_obj.sunHours
 	except:
-		print("ERROR on reading WeatherForecast!")
+		print("ERROR on reading model 'WeatherForecast'!")
 		return False
 
 def logWeatherForecast():

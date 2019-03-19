@@ -25,6 +25,8 @@ def createSmartDevice(smartDeviceData):
   print(smartDeviceCreated)
   return smartDevice
 
+
+
 # switches luftibus on via IFTTT trigger
 # TODO: save history in model
 def luftibus_on(reason=None):
@@ -106,13 +108,22 @@ def luftibus_off(reason=None):
     luftibusLastSkippedForcedOn = luftibusConfig_obj.get(smartDeviceDataKey='last_skipped_forced_ON')
     luftibusLastSkippedForcedOn_date = datetime.strptime(str(luftibusLastSkippedForcedOn.smartDeviceDataValue), "%Y-%m-%d").date()
     
+    if luftibusTotTimeONDate_date != date.today():
+      print("reset luftibusTotTimeON & luftibusTotTimeONDate")
+      luftibusTotTimeON.smartDeviceDataValue = 0
+      luftibusTotTimeON_int = 0
+      luftibusTotTimeONDate.smartDeviceDataValue = date.today()
+      luftibusTotTimeONDate_date = date.today()
+      luftibusTotTimeON.save()
+      luftibusTotTimeONDate.save()
+
     timeDiff = datetime.now() - luftibusLastON_date
     timeDiff = round(timeDiff.total_seconds())
     print("time diff: " + str(timeDiff))
 
     luftibusTimeON.smartDeviceDataValue = timeDiff
     luftibusTimeON.save()
-    
+
     daysLastSkippedForcedOn = date.today() - luftibusLastSkippedForcedOn_date 
     print("daysLastSkippedForcedOn: " + str(daysLastSkippedForcedOn.days))
 
