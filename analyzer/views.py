@@ -30,6 +30,7 @@ APIID = getattr(settings, 'SEDGE_SITEID', None)
 solE = solaredge.Solaredge(APIKEY)
 
 
+# TODO: Change weather API to OpenWeather API
 # Load worldweatheronline.com API Key and Configuration
 weatherAPIKEY = "cdb9121d690f43aca7a110709191801"
 weatherAPILocation = "Meilen"
@@ -213,6 +214,7 @@ def home(request):
         # print(weather_api_forecastedSunHours)
     except:
         pass
+        print("ERROR weather_api_forecastedSunHours")
         weather_api_forecastedSunHours = None
 
     # Create SmartDevice
