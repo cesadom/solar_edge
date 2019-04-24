@@ -187,6 +187,8 @@ def home(request):
     """
     
     # Parse Weather API result
+    # TODO: Configure new Weather API as this one is not valid anymore
+    '''
     try:
         weather_api_weatherForecast = request.session['weather_api_res']['data']['weather']
         weather_api_forecastedSunHours = dict()
@@ -216,6 +218,7 @@ def home(request):
         pass
         print("ERROR weather_api_forecastedSunHours")
         weather_api_forecastedSunHours = None
+    '''
 
     # Create SmartDevice
     smartDevice1 = {
@@ -278,7 +281,7 @@ def home(request):
             'api_res_site_dataPeriod': api_res_site_dataPeriod,
             'api_res_site_energy': api_res_site_energy,
             'api_res_site_energyDetails': api_res_site_energyDetails,
-            'weather_api_res_all': weather_api_forecastedSunHours,
+            # 'weather_api_res_all': weather_api_forecastedSunHours,
             # 'smartDevice1_obj': smartDevice1_obj,
             # 'smartDevice2_obj': smartDevice2_obj
         },
@@ -618,9 +621,11 @@ def routineThread(times):
         sys.stdout.flush()
 
         # Write Weatherforecast in DB
+        '''
         logWeatherFCSuccess = logWeatherForecast()
         print('Log Weatherforecast into DB successful = ' + str(logWeatherFCSuccess))
         sys.stdout.flush()
+        '''
         
         # Switch luftibus
         # switchLuftibusSuccess = switchLuftibus()

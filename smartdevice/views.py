@@ -127,11 +127,16 @@ def luftibus_off(reason=None):
     daysLastSkippedForcedOn = date.today() - luftibusLastSkippedForcedOn_date 
     print("daysLastSkippedForcedOn: " + str(daysLastSkippedForcedOn.days))
 
+    # TODO change Weatherforecast 
+    '''
     if sunPerDay(date.today() + timedelta(1)) >= 10:
       sunTomorrow = True
       luftibusLastSkippedForcedOn.smartDeviceDataValue = date.today()
     else:
       sunTomorrow = False
+    '''
+    # only mocked due to missing Weather API
+    sunTomorrow = False
 
     # decide wether to switch off or not depending on the time on
     if timeDiff <= (60*15) and not reason:
