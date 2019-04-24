@@ -628,7 +628,10 @@ def routineThread(times):
         '''
         
         # Switch luftibus
-        # switchLuftibusSuccess = switchLuftibus()
+        switchLuftibusThreads.append(Thread(target = switchLuftibus, args = ()))
+        switchLuftibus.start()
+        print('Switch luftibus thread started')
+        	# switchLuftibusSuccess = switchLuftibus()
         # print('Switch luftibus successful = ' + str(switchLuftibusSuccess))
         # sys.stdout.flush()
 
